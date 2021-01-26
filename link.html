@@ -1,11 +1,22 @@
-<html lang="en">
+<!DOCTYPE html>
+<html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="images/coffee/logoputih.png" type="image/gif" sizes="16x16">
     <title>150 Coffee Garden</title>
+    <meta name="description" content="150 Coffee Garden - Tempat Nongkrong ternyaman di tengah Kota Bandung">
 
-   <!-- Global site tag (gtag.js) - Google Analytics -->
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+    
+    <!-- Favicon -->
+
+    <link rel="icon" href="images/coffee/logoputih.png" type="image/gif" sizes="16x16">
+
+
+    <!-- Global site tag (gtag.js) - Google Analytdcx5ics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156429638-1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -15,94 +26,62 @@
   gtag('config', 'UA-156429638-1');
 </script>
 
+        <!-- Facebook Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window,document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+ fbq('init', '1019637798400517'); 
+fbq('track', 'PageView');
+</script>
+<noscript>
+ <img height="1" width="1" 
+src="https://www.facebook.com/tr?id=1019637798400517&ev=PageView
+&noscript=1"/>
+</noscript>
+<!-- End Facebook Pixel Code -->
 
 
-<style type="text/css">
-body {
-    background-image: url(images/coffee/banner2.jpg);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    color: #fff;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 15px;
-    letter-spacing: 2px;
-}
 
-.img {
-    border-radius: 50%;
-  }
-
-.profile-picture {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 5%;
-    height: auto;
-    max-width: 100px;
-  }
-
-.profile-name {
-      text-align: center;
-      padding: 30px;
-      color: white;
-      font-weight: bold;
-  }
-
-.links {
-      text-align: center;
-      margin-top: 20px;
-      padding: 20px;
-      border: 1px solid white;
-      border-width: 2px;
-      width: 70%;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      border-radius: 40px;
-
-  }
-
-a {
-    text-decoration: none;
-    color: white;
-    transition: color 1s; 
-}
-
-.bottom-text {
-    text-align: center;
-    margin-top: 50px;
-    font-size: 12px;
-}
-
-a:hover {
-    color: #000;
-    background: #fff;
-}
-
-
-</style>
 </head>
 
 <body>
-    
-    <!-- Profile picture-->
-    <img src="images/coffee/logoputih.png" alt="profile picture" class="profile-picture">
+    <section class="animated-background">
+        <div id="stars1"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+    </section>
 
-    <!-- Profile name-->
-    <div class="profile-name">@150coffeegarden</div>
+    <a id="profilePicture" href="https://www.instagram.com/150coffeegarden/">
+        <img src="images/coffee/logoputih.png" alt="150 Coffee Garden">
+    </a>
 
-    <!-- Links-->
-        <a href="https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDMyMjcyOTAwMDA2OTE2?igshid=ryez7f5exvjm&amp;story_media_id=1975633660560599811" target="_blank" class="links">MENU 150</a>
-        <a href="https://g.page/150coffeegarden?share" target="_blank" class="links">LOKASI</a>
-        <a href="https://forms.gle/xTGFUBhUbct4psMc7" target="_blank" class="links">Mau Reservasi</a>
-        <a href="https://g.page/150coffeegarden/review?gm" target="_blank" class="links">Beri Kami Ulasan</a>
-        <a href="https://api.whatsapp.com/send?phone=628122100574&text=Halo%20150%20Wedding%20Venue!!!" target="_blank" class="links">Nanya Soal Wedding?</a>
-        <a href="https://bit.ly/wa150" target="_blank" class="links">Whatsapp Admin</a>
+    <div id="links">
+        <a class="link" href="https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDMyMjcyOTAwMDA2OTE2?igshid=ryez7f5exvjm&story_media_id=1975633660560599811" target="_blank">
+          <i class="fa fa-bars" aria-hidden="true">&nbsp;</i>Menu 150</a>
+        <a class="link" href="https://g.page/150coffeegarden?share" target="_blank" id="hashtag">
+          <i class="fa fa-map-marker" aria-hidden="true">&nbsp;&nbsp;&nbsp;</i>Lokasi</a>
+        <a class="link" href="https://api.whatsapp.com/send?phone=628122100574&text=Halo%20150%20Wedding%20Venue!!!" target="_blank">
+          <i class="fa fa-whatsapp">&nbsp;</i>Nanya Soal Wedding?</a>
+    <a class="link" href="https://bit.ly/wa150" target="_blank">
+          <i class="fa fa-whatsapp" aria-hidden="true">&nbsp;</i>Whatsapp Admin</a>
+        <a class="link" href="https://forms.gle/xTGFUBhUbct4psMc7" target="_blank">
+          <i class="fa fa-table" aria-hidden="true">&nbsp;</i>Reservasi</a>
+        <a class="link" href="https://g.page/150coffeegarden/review?gm" target="_blank">
+          <i class="fa fa-pencil-square" aria-hidden="true">&nbsp;</i>Beri Kami Ulasan</a>
+    </div>
 
-
-<div class="bottom-text">Jl. Sulaksana No.50, <br>Kota Bandung, Jawa Barat 40282.</div>
-<br></br>
- 
+  <div>
+    <a id="userName" href="https://g.page/150coffeegarden?share">Jl. Sulaksana No. 50,<br>Kota Bandung, Jawa Barat.</a>
+    </div>
+<div id="hashtag"><br>
+  <a href="https://www.instagram.com/150coffeegarden/">#OutdoorCoffee</a>
+</div>>
 </body>
+
 </html>
