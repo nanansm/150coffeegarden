@@ -24,10 +24,10 @@ body {
     display: block;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 5%;
+    margin-top: 1%;
     height: auto;
-    max-width: 100px;
-    margin-bottom: 5%;
+    max-width: 200px;
+    margin-bottom: 1%;
 }
 
 #userName {
@@ -40,6 +40,51 @@ body {
     width: 100%;
     text-align: center;
     text-decoration: none;
+}
+
+#admin {
+    color: #fff;
+    position: relative;
+    max-width: 675px;
+    width: auto;
+    display: flex;
+    margin: auto;
+}
+
+.admin {
+    position: relative;
+    background-color: transparent;
+    color: var(--accentColor);
+    border: solid var(--accentColor) 2px;
+    border-radius: 10px;
+    font-size: 1rem;
+    text-align: center;
+    display: block;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 15px;
+    width: 50%;
+    padding: 10px; /* 17px */
+    text-decoration: none;
+    /* transition: all .25s cubic-bezier(.08, .59, .29, .99); */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.contact {
+    color: #fff;
+    position: relative;
+    max-width: 675px;
+    width: auto;
+    display: flex;
+    margin: auto;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.garis {
+    margin-bottom: 30px;
+    width: 25%;
+    height: 1px;
 }
 
 #links {
@@ -65,6 +110,18 @@ body {
     text-decoration: none;
     /* transition: all .25s cubic-bezier(.08, .59, .29, .99); */
     -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+    .admin:hover {
+        background-color: var(--accentColor);
+        color: var(--bgColor);
+    }
+}
+
+.admin:active {
+    background-color: var(--accentColor);
+    color: var(--bgColor);
 }
 
 @media (hover: hover) {
