@@ -5609,4 +5609,17 @@ body {
         max-height: calc(100vh - 104px)
     }
 }
+
+.merchant {
+    width: 80%;
+    display: block;
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5%;
+      }
+
+      
 /*# sourceMappingURL=../sourcemaps/index.css.map */
