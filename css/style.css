@@ -1,0 +1,183 @@
+*,
+:after,
+:before {
+  box-sizing: inherit;
+}
+
+/**********TAG SELECTORS**********/
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+  
+}
+
+
+
+body {
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  text-align: center;
+  max-width: 100%;
+  min-height: 100vh;
+  height: auto;
+  letter-spacing: 0.1em;
+  font-family: 'PP Neue Montreal', sans-serif;
+                                                
+  background-color: #1a503d;
+}
+
+h1 {
+  color: #fff4dc;
+}
+
+h2 {
+  color: #fff4dc;
+  letter-spacing: 0em;
+}
+
+h3{
+  font-weight: 500; color: #fff4dc;
+}
+
+p{
+  color: #ffffff;
+}
+
+h4 {
+  color: #7f987b;
+}
+
+hr {
+  border-style: none;
+  border-top-style: dotted;
+  border-color: rgb(196, 196, 196);
+  border-width: 5px;
+  width: 100px;
+}
+
+/**********CLASS SELECTORS**********/
+
+.logo {
+  width: 110px;
+  height: auto;
+  display: block;
+  margin: 35px auto;
+  border-radius: 100%;
+  border: 3px solid #ffffff;
+  background-color: #fff4dc;
+}
+
+.logotext {
+  display: block;
+  max-width: 550px;
+  margin: 0 auto 1px;
+  padding: 1px 1px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+
+.links {
+  display: block;
+  max-width: 550px;
+  margin: 0 auto 1px;
+  padding: 1px 1px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.linktext{
+  display: block;
+  max-width: 550px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  border-radius: 20px;
+  border: 2px solid #ffff;
+  margin: 0 auto 15px;
+  font-weight: 500;
+  color: #000000;
+  padding: 15px 1px;
+  background-color: #fff4dc;
+  box-shadow: 2px 5px black;
+}
+
+
+
+.links .links:hover {
+  background-color: #fff4dc;
+}
+
+
+
+
+.links .links_second {
+  
+
+  
+}
+
+.channels {
+  display: inline-flex;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.channels .channels_item {
+  flex: 5;
+  margin-right: 8px;
+  transition: transform 0.2s;
+  color: #ffffff;
+}
+
+.channels_item:hover {
+  transition: transform 1.5s;
+  color: #ffffff;
+}
+
+.float{
+	position:fixed;
+	right:10px;
+    bottom:20px;
+    width:45px;
+	height:45px;
+	/*background-color:#25d366;*/
+	/*color:#FFF;*/
+    text-align:center;
+    line-height: 45px;
+	border-radius:50%;
+  z-index:999;
+}
+.float i {
+    line-height: inherit;
+}
+
+.float img {
+    line-height: inherit;
+}
+
+.my-float{
+	margin-top:16px;
+}
+
+
+
+/**********ID SELECTORS**********/
+/*ID Selectors can only be ussed once per page*/
+/*
+
+#heading {
+  color: blue
+}
+
+*/
