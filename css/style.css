@@ -83,6 +83,25 @@ hr {
   transition: all 0.2s ease-in-out;
 }
 
+.logos {
+  position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0%;
+  margin-right: 0%;
+}
+.merchant {
+    width: 80%;
+    display: block;
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5%;
+}
+
 
 .links {
   display: block;
@@ -169,6 +188,8 @@ hr {
 .my-float{
 	margin-top:16px;
 }
+
+
 
 
 
