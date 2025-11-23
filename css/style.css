@@ -4,25 +4,12 @@
   box-sizing: border-box;
 }
 
-:root {
-  --cream: #f5e7c3;
-  --yellow: #f4cf56;
-  --orange: #f3a05c;
-  --charcoal: #1c1a18;
-  --muted: #7d7463;
-  --accent-blue: #8ab0d5;
-  --accent-olive: #c7c6a0;
-  --shadow: 12px 12px 0 rgba(0, 0, 0, 0.08);
-}
 
-html {
-  scroll-behavior: smooth;
-}
 
 body {
   margin: 0;
-  background: var(--cream);
-  color: var(--charcoal);
+  background: #f5e7c3;
+  color: #1c1a18;
   font-family: "PP Neue Montreal", "Space Grotesk", sans-serif;
   line-height: 1.6;
 }
@@ -74,7 +61,7 @@ img {
 }
 
 .pill {
-  border: 1px solid var(--charcoal);
+  border: 1px solid #1c1a18;
   background: #fff5d8;
   border-radius: 999px;
   padding: 9px 16px;
@@ -84,7 +71,7 @@ img {
 }
 
 .pill-active {
-  box-shadow: var(--shadow);
+  box-shadow: 12px 12px 0 rgba(0, 0, 0, 0.08);
 }
 
 .link {
@@ -99,7 +86,7 @@ img {
   bottom: -2px;
   width: 100%;
   height: 1px;
-  background: var(--charcoal);
+  background: #1c1a18;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -135,7 +122,7 @@ h1 {
 
 .lede {
   margin: 0;
-  color: var(--muted);
+  color: #7d7463;
   font-size: 15px;
 }
 
@@ -166,7 +153,7 @@ h1 {
   font-weight: 700;
   text-align: center;
   font-size: 12px;
-  box-shadow: var(--shadow);
+  box-shadow: 12px 12px 0 rgba(0, 0, 0, 0.08);
   color: white;
 }
 
@@ -184,7 +171,7 @@ h1 {
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
-  border: 1.5px solid var(--charcoal);
+  border: 1.5px solid #1c1a18;
   box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.08);
 }
 
@@ -200,7 +187,7 @@ h1 {
 .week-status .line {
   height: 1px;
   width: 120px;
-  background: var(--charcoal);
+  background: #1c1a18;
   display: inline-block;
 }
 
@@ -232,7 +219,7 @@ h1 {
   font-weight: 700;
   text-align: left;
 
-  border: 1.5px solid var(--charcoal);
+  border: 1.5px solid #1c1a18;
   box-shadow: 8px 5px 0 #e3c778;
 
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -267,23 +254,23 @@ h1 {
 
 .feature-copy {
   max-width: 500px;
-  color: var(--muted);
+  color: #7d7463;
   font-size: 15px;
 }
 
 .feature-copy p:last-child {
   font-weight: 700;
-  color: var(--charcoal);
+  color: #1c1a18;
 }
 
 .feature-image img {
   width: 100%;
-  border: 1.5px solid var(--charcoal);
+  border: 1.5px solid #1c1a18;
   box-shadow: 12px 12px 0 #e3c778;
 }
 
 .newsletter {
-  background: var(--yellow);
+  background: #f4cf56;
   padding: 70px 0;
 }
 
@@ -294,9 +281,9 @@ h1 {
 }
 
 .newsletter-card {
-  border: 1.5px solid var(--charcoal);
+  border: 1.5px solid #1c1a18;
   padding: 26px 24px;
-  background: var(--yellow);
+  background: #f4cf56;
   position: relative;
   box-shadow: 12px 12px 0 rgba(0, 0, 0, 0.08);
 }
@@ -308,7 +295,7 @@ h1 {
 }
 
 .newsletter-card .small {
-  color: var(--charcoal);
+  color: #1c1a18;
   font-size: 14px;
   margin: 0 0 12px;
 }
@@ -317,7 +304,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 2px solid var(--charcoal);
+  border-bottom: 2px solid #1c1a18;
   padding: 6px 0;
   margin: 12px 0 18px;
 }
@@ -332,7 +319,7 @@ h1 {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--charcoal);
+  background: #1c1a18;
   display: block;
 }
 
@@ -350,7 +337,7 @@ h1 {
   background: transparent;
   font-size: 18px;
   cursor: pointer;
-  color: var(--charcoal);
+  color: #1c1a18;
 }
 
 .chip {
@@ -362,12 +349,12 @@ h1 {
 }
 
 .chip-blue {
-  background: var(--accent-blue);
+  background: #8ab0d5;
   color: #0c273d;
 }
 
 .chip-olive {
-  background: var(--accent-olive);
+  background: #c7c6a0;
   color: #1f1e0f;
 }
 
