@@ -79,7 +79,7 @@
 
             <h1 class="hero__title">
               Venue Wedding Outdoor<br />
-              <span class="hero__titleAccent">Start 12jt</span>
+              <span class="hero__titleAccent">Start 17jt</span>
               <span class="hero__sub">di Bandung Timur</span>
             </h1>
 
@@ -178,8 +178,8 @@
               <img src="img/5.webp" alt="Moment 2" />
               <span class="masonry__tag">Aisle</span>
             </button>
-            <button class="masonry__item" data-img="assets/moment-3.jpg" aria-label="Buka foto 3">
-              <img src="assets/moment-3.jpg" alt="Moment 3" />
+            <button class="masonry__item" data-img="img/w1.webp" aria-label="Buka foto 3">
+              <img src="img/w1.webp" alt="Moment 3" />
               <span class="masonry__tag">Reception</span>
             </button>
           </div>
@@ -198,7 +198,7 @@
             <article class="price">
               <div class="price__top">
                 <h3>Basic Garden</h3>
-                <div class="price__value">Start 12jt</div>
+                <div class="price__value">Start 17jt</div>
               </div>
               <ul>
                 <li>Venue garden</li>
@@ -246,39 +246,37 @@
         <div class="container">
           <div class="section__head">
             <h2>Availability Calendar</h2>
-            <p>
-              Lihat tanggal available/booked. Setelah pilih tanggal, klik “Chat WA” untuk konfirmasi & lock date.
-            </p>
           </div>
 
           <div class="calendar">
             <div class="calendar__bar">
               <button class="iconBtn" id="calPrev" aria-label="Bulan sebelumnya">‹</button>
-              <div class="calendar__title" id="calTitle">Loading...</div>
+              <div class="calendar__title" id="calTitle">Bentar...</div>
               <button class="iconBtn" id="calNext" aria-label="Bulan berikutnya">›</button>
             </div>
 
             <div class="calendar__legend">
               <span class="legend legend--avail">Available</span>
-              <span class="legend legend--tent">Tentative</span>
               <span class="legend legend--book">Booked</span>
             </div>
 
             <div class="calendar__grid" id="calGrid" aria-live="polite"></div>
 
             <div class="calendar__foot">
-              <div class="calendar__hint" id="calHint">
-                *Status bisa berubah. Konfirmasi final via WhatsApp.
+              <div class="calendar-action">
+                <p id="selectedDateInfo">
+                  Silakan pilih tanggal terlebih dahulu
+                </p>
+                <button id="lockDateBtn" disabled class="btn btn--primary">
+                  Check & Lock Date via WhatsApp
+                </button>
               </div>
-              <a class="btn btn--primary" href="#action">
-                Chat WA untuk lock date <span class="btn__arrow">››››</span>
-              </a>
+
             </div>
+            
           </div>
 
-          <div class="note">
-            Jika kamu ingin kalender realtime dari Google Sheet, publish Sheet lalu isi <b>SHEET_ID</b> & <b>GID</b> di file JS.
-          </div>
+          
         </div>
       </section>
 

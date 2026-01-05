@@ -503,9 +503,8 @@ button{font-family:inherit}
   border-radius: 999px;
   border: 1px solid rgba(18,18,18,.10);
 }
-.legend--avail{ background: rgba(15,59,42,.12); color: var(--primary); }
-.legend--tent{ background: rgba(240,162,34,.14); color: #9a6400; }
-.legend--book{ background: rgba(0,0,0,.10); color: rgba(118, 64, 64, 0.75); }
+.legend--avail{ background: rgba(15, 59, 42, 0); color: var(--primary); }
+.legend--book{ background: rgba(255, 255, 255, 0); color: rgb(255, 0, 0); }
 
 .calendar__grid{
   display:grid;
@@ -529,6 +528,25 @@ button{font-family:inherit}
   flex-direction:column;
   gap: 6px;
 }
+.cell--selected {
+  outline: 3px solid #184c2e;
+  background: #eef5f0;
+}
+/* =========================
+   BOOKED DATE – RED PILL
+   ========================= */
+
+.cell--booked{
+  background: #ffecec !important;
+  border: 1px solid #ff0000 !important;
+}
+
+.cell--booked::after{
+  background: #ff0000 !important;
+  color: #ffffff !important;
+}
+
+
 .cell--muted{ opacity: .35; }
 .cell__num{ font-weight: 1000; font-size: 13px; }
 .cell__tag{
@@ -542,7 +560,7 @@ button{font-family:inherit}
 }
 .tag--avail{ background: rgba(15,59,42,.12); color: var(--primary); }
 .tag--tent{ background: rgba(240,162,34,.14); color:#9a6400; }
-.tag--book{ background: rgba(0,0,0,.10); color: rgba(0,0,0,.72); }
+.tag--book{ background: rgba(0,0,0,.10); color: #ff0000; }
 
 .calendar__foot{
   display:flex;
@@ -719,4 +737,6 @@ button{font-family:inherit}
   .calendar__grid{ gap: 6px; }
   .cell{ min-height: 30px; }
   .highlights__row{ padding: 12px; }
+  .cell__tag{
+  font-size: 5px; display:contents;}
 }
