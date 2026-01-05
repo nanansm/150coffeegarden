@@ -47,7 +47,7 @@ button{font-family:inherit}
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding: 12px 0;
+  padding: 12px 8px;
   gap: 12px;
 }
 
@@ -58,15 +58,12 @@ button{font-family:inherit}
   font-weight:800;
   letter-spacing:.06em;
   font-size: 18px;
-  padding: 8px 10px;
-  border: 1px solid var(--outline);
-  border-radius: 999px;
-  background: rgba(255,255,255,.55);
+  padding: 8px 0px 8px 10px;
 }
 .brand__text{
-  font-weight:700;
+  font-weight:800;
   letter-spacing:.02em;
-  text-transform: lowercase;
+  
   opacity:.85;
 }
 
@@ -189,7 +186,7 @@ button{font-family:inherit}
 /* Hero */
 .hero{
   position:relative;
-  min-height: clamp(560px, 78vh, 760px);
+  min-height: clamp(560px, 85vh, 760px);
   display:grid;
   place-items: center;
   overflow:hidden;
@@ -209,8 +206,8 @@ button{font-family:inherit}
   position:absolute;
   inset:0;
   background:
-    radial-gradient(900px 500px at 50% 40%, rgba(0,0,0,.06), rgba(0,0,0,.1) 70%),
-    linear-gradient(to bottom, rgba(0,0,0,.20), rgba(0,0,0,.62));
+    radial-gradient(900px 500px at 40% 40%, rgba(0,0,0,.06), rgba(0,0,0,.1) 70%),
+    linear-gradient(to bottom, rgba(0,0,0,.20), rgba(0,0,0,.32));
 }
 .hero__content{
   position:relative;
