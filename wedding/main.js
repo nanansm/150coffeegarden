@@ -193,7 +193,7 @@ function initLockButton() {
     if (!selectedDate) return;
 
     const message =
-      "Halo min 150 Wedding Venue, saya mau cek tanggal wedding:\n\n" +
+      "Halo 150 Wedding Venue, saya mau cek tanggal wedding:\n\n" +
       `📅 Tanggal: ${selectedDate}\n` +
       "Apakah Masih Available?\n\n" +
       "Terima kasih 🙏";
