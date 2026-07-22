@@ -1,0 +1,70 @@
+---
+/**
+ * 404 page.
+ *
+ * Beyond the obvious "page not found" job, this file matters for cache
+ * hygiene on Cloudflare Pages: without a 404.html in the output, Pages serves
+ * the root index.html with a 200 status for any unmatched path. When an
+ * `/_astro/*` asset is requested a moment before it is warm at an edge (e.g.
+ * right after a deploy), that 200-HTML response gets the `immutable`,
+ * one-year cache-control from _headers and is cached in place of the real
+ * image — permanently breaking that asset until the cache is purged.
+ *
+ * Shipping a real 404.html makes Pages return a 404 for missing paths instead,
+ * which is not cached as a successful asset, so the poisoning cannot happen.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { localizedPath } from '../i18n/config';
+---
+
+<BaseLayout
+  title="Halaman tidak ditemukan — 150 Coffee Garden"
+  description="Halaman yang kamu cari tidak ada atau sudah dipindahkan."
+  route="/404"
+  locale="id"
+  noindex
+>
+  <section class="section">
+    <div class="container nf">
+      <p class="nf__code">404</p>
+      <h1 class="nf__title">Halaman tidak ditemukan.</h1>
+      <p class="nf__lead">
+        Halamannya mungkin sudah dipindahkan atau tautannya keliru. Balik ke
+        beranda, atau langsung lihat venue wedding-nya.
+      </p>
+      <div class="nf__cta">
+        <a class="btn" href={localizedPath('/', 'id')}>Ke Beranda</a>
+        <a class="btn btn--ghost" href={localizedPath('/wedding/', 'id')}>Wedding dan Acara</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: var(--sp-3);
+    padding-block: var(--sp-16);
+  }
+
+  .nf__code {
+    font-family: var(--font-display);
+    font-size: var(--fs-h1);
+    color: var(--green-600);
+  }
+
+  .nf__lead {
+    color: var(--text-muted);
+    max-width: 44ch;
+  }
+
+  .nf__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    justify-content: center;
+    margin-block-start: var(--sp-4);
+  }
+</style>
