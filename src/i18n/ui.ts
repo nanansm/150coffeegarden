@@ -32,6 +32,7 @@ export const ui = {
     nav: {
       home: 'Home',
       wedding: 'Wedding & Events',
+      feedback: 'Give Us Your Feedback',
       menu: 'Menu',
       location: 'Location',
       reserve: 'Reserve',
@@ -382,6 +383,7 @@ export const ui = {
     nav: {
       home: 'Beranda',
       wedding: 'Wedding & Acara',
+      feedback: 'Beri Masukan',
       menu: 'Menu',
       location: 'Lokasi',
       reserve: 'Reservasi',

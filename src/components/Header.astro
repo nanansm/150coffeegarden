@@ -16,6 +16,7 @@ const ui = t(locale);
 const items = [
   { label: ui.nav.home, href: localizedPath('/', locale), key: '/' },
   { label: ui.nav.wedding, href: localizedPath('/wedding/', locale), key: '/wedding/', prefetch: true },
+  { label: ui.nav.feedback, href: links.feedbackForm, external: true },
   { label: ui.nav.menu, href: links.menuPdf, external: true },
   { label: ui.nav.location, href: `${localizedPath('/', locale)}#lokasi` },
 ];
