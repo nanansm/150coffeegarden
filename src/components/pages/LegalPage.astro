@@ -1,0 +1,100 @@
+---
+/**
+ * Privacy policy / terms of service.
+ *
+ * These existed on the old site and every footer on the rebuild still links to
+ * them, so without these routes both links 404 site-wide.
+ *
+ * The copy is Indonesian on both locales on purpose: it is the text the
+ * business already published, and a translated legal page would be a second
+ * document saying something subtly different.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { legal } from '../../data/legal';
+import { t } from '../../i18n/ui';
+import type { Locale } from '../../i18n/config';
+
+interface Props {
+  locale: Locale;
+  doc: 'privacy' | 'terms';
+}
+
+const { locale, doc } = Astro.props;
+const ui = t(locale);
+
+const sections = legal[doc];
+const title = doc === 'privacy' ? ui.common.privacy : ui.common.terms;
+const route = doc === 'privacy' ? '/privacypolicy/' : '/termsofservice/';
+const description =
+  doc === 'privacy'
+    ? 'Kebijakan privasi 150 Coffee Garden: data apa yang dikumpulkan, untuk apa digunakan, dan hak kamu atas data tersebut.'
+    : 'Syarat layanan 150 Coffee Garden: ketentuan reservasi, penggunaan tempat, dan tanggung jawab pengunjung.';
+---
+
+<BaseLayout {title} {description} {route} {locale}>
+  <section class="section">
+    <div class="container">
+      <h1>{title}</h1>
+
+      <div class="prose legal" lang="id">
+        {
+          sections.map((section) => (
+            <>
+              <h2>{section.heading}</h2>
+              {(() => {
+                const out: unknown[] = [];
+                let bullets: string[] = [];
+                const flush = () => {
+                  if (!bullets.length) return null;
+                  const items = bullets;
+                  bullets = [];
+                  return (
+                    <ul>
+                      {items.map((b) => (
+                        <li>{b}</li>
+                      ))}
+                    </ul>
+                  );
+                };
+                section.body.forEach((block) => {
+                  if (block.type === 'li') {
+                    bullets.push(block.text);
+                  } else {
+                    const list = flush();
+                    if (list) out.push(list);
+                    out.push(<p>{block.text}</p>);
+                  }
+                });
+                const tail = flush();
+                if (tail) out.push(tail);
+                return out;
+              })()}
+            </>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin-block-end: var(--sp-8);
+  }
+
+  .legal {
+    /* Numbered headings already carry the structure, so they sit tighter than
+       the default prose rhythm would place them. */
+    --flow: var(--sp-4);
+  }
+
+  .legal :global(h2) {
+    font-size: var(--fs-h3);
+    margin-block-start: var(--sp-12);
+  }
+
+  .legal :global(p),
+  .legal :global(li) {
+    color: var(--text-muted);
+  }
+</style>

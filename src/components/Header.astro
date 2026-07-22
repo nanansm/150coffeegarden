@@ -1,0 +1,192 @@
+---
+import { links, wa } from '../data/site';
+import { localizedPath, type Locale } from '../i18n/config';
+import { t } from '../i18n/ui';
+import WhatsAppCTA from './WhatsAppCTA.astro';
+import LangSwitcher from './LangSwitcher.astro';
+
+interface Props {
+  locale: Locale;
+  route: string;
+}
+
+const { locale, route } = Astro.props;
+const ui = t(locale);
+
+const items = [
+  { label: ui.nav.home, href: localizedPath('/', locale), key: '/' },
+  { label: ui.nav.wedding, href: localizedPath('/wedding/', locale), key: '/wedding/', prefetch: true },
+  { label: ui.nav.menu, href: links.menuPdf, external: true },
+  { label: ui.nav.location, href: `${localizedPath('/', locale)}#lokasi` },
+];
+---
+
+<header class="hdr">
+  <div class="container hdr__inner">
+    <a class="hdr__brand" href={localizedPath('/', locale)} aria-label="150 Coffee Garden">
+      <img
+        src="/brand/logo-green.webp"
+        srcset="/brand/logo-green.webp 1x, /brand/logo-green@2x.webp 2x"
+        width="320"
+        height="282"
+        alt="150 Coffee Garden"
+        fetchpriority="high"
+      />
+    </a>
+
+    <nav class="hdr__nav" aria-label={ui.nav.navLabel}>
+      {
+        items.map((item) => (
+          <a
+            href={item.href}
+            class:list={['hdr__link', item.key === route && 'is-active']}
+            target={item.external ? '_blank' : undefined}
+            rel={item.external ? 'noopener' : undefined}
+            data-astro-prefetch={item.prefetch ? '' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="hdr__actions">
+      <LangSwitcher {locale} {route} class="hdr__lang" />
+
+      {/* The WA button stays visible in the bar on mobile — it is the money link. */}
+      <WhatsAppCTA
+        number={wa.reservasi}
+        message={ui.wa.reservasi}
+        label={ui.nav.reserve}
+        class="hdr__cta"
+      />
+
+      {/* The legacy site styled a .burger but the element was missing from the
+          markup entirely, so the drawer was unreachable. It exists now. */}
+      <button
+        type="button"
+        class="burger"
+        aria-label={ui.nav.openMenu}
+        aria-expanded="false"
+        aria-controls="drawer"
+        data-drawer-open
+      >
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .hdr {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background: color-mix(in srgb, var(--bg) 97%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hdr__inner {
+    min-height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+
+  .hdr__brand {
+    display: block;
+    flex: none;
+  }
+
+  .hdr__brand img {
+    /* Height-driven so the mark stays optically consistent as the bar
+       changes height; width follows the intrinsic ratio. */
+    height: 2.25rem;
+    width: auto;
+  }
+
+  .hdr__nav {
+    display: none;
+  }
+
+  .hdr__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+
+  /* Rendered by WhatsAppCTA, so it carries that component's scope id, not
+     this one's. Without :global the selector silently never matches. */
+  :global(a.hdr__cta) {
+    display: none;
+  }
+
+  .burger {
+    display: grid;
+    place-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-full);
+    cursor: pointer;
+  }
+
+  .burger span {
+    display: block;
+    width: 16px;
+    height: 1.5px;
+    background: var(--green-600);
+  }
+
+  @media (min-width: 64rem) {
+    .hdr__brand img {
+      height: 2.75rem;
+    }
+
+    /* Desktop only: no sticky bar there, so the bar needs its own CTA. */
+    :global(a.hdr__cta) {
+      display: inline-flex;
+      min-height: 42px;
+      /* NB: a --sp-5 token does not exist in tokens.css. An unknown custom property
+         is "invalid at computed-value time", which resolves to the initial value
+         (0) rather than falling back to the .btn padding — the button collapsed
+         to zero side padding. Use a token that exists. */
+      padding-inline: var(--sp-6);
+    }
+
+    .hdr__nav {
+      display: flex;
+      gap: var(--sp-6);
+    }
+
+    .hdr__link {
+      position: relative;
+      font-size: var(--fs-sm);
+      text-decoration: none;
+      padding-block: var(--sp-2);
+    }
+
+    /* Motif: the yellow hairline marks the active page. */
+    .hdr__link.is-active::after {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      bottom: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .hdr__actions {
+      gap: var(--sp-4);
+    }
+
+    .burger {
+      display: none;
+    }
+  }
+</style>

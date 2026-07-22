@@ -1,0 +1,124 @@
+---
+/**
+ * FAQ accordion — ZERO JavaScript.
+ *
+ * Native <details>/<summary> gives keyboard support, correct semantics, and
+ * in-page find (Chromium expands a <details> to reveal a Ctrl+F match)
+ * without a single byte of script. The legacy markup used buttons with
+ * aria-expanded and no JS behind them, so nothing opened at all.
+ *
+ * Exclusive-accordion behaviour via name="faq" is deliberately NOT used:
+ * independent toggling is better for a FAQ people scan.
+ */
+import type { FaqItem } from '../data/faq';
+
+interface Props {
+  items: FaqItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="faq">
+  {
+    items.map((item) => (
+      <details class="faq__item">
+        <summary class="faq__q">
+          <span>{item.q}</span>
+          <span class="faq__icon" aria-hidden="true" />
+        </summary>
+        <div class="faq__a">
+          <p>{item.a}</p>
+        </div>
+      </details>
+    ))
+  }
+</div>
+
+<style>
+  .faq {
+    display: grid;
+    gap: var(--sp-2);
+    max-width: 52rem;
+  }
+
+  .faq__item {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface);
+  }
+
+  .faq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    min-height: 56px;
+    padding: var(--sp-4) var(--sp-6);
+    font-family: var(--font-display);
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .faq__q::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq__q::marker {
+    content: none;
+  }
+
+  /* The +/- indicator, drawn in CSS. No icon library. */
+  .faq__icon {
+    position: relative;
+    flex: none;
+    width: 14px;
+    height: 14px;
+  }
+
+  .faq__icon::before,
+  .faq__icon::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto 0;
+    height: 1.5px;
+    background: var(--green-600);
+    transition: rotate var(--dur) var(--ease);
+  }
+
+  .faq__icon::after {
+    rotate: 90deg;
+  }
+
+  .faq__item[open] .faq__icon::after {
+    rotate: 0deg;
+  }
+
+  .faq__a {
+    padding: 0 var(--sp-6) var(--sp-6);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+
+  /* Height animation with no JS. Older browsers simply snap open. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (interpolate-size: allow-keywords) {
+      :root {
+        interpolate-size: allow-keywords;
+      }
+
+      .faq__item::details-content {
+        block-size: 0;
+        overflow: hidden;
+        transition:
+          block-size var(--dur) var(--ease),
+          content-visibility var(--dur) allow-discrete;
+      }
+
+      .faq__item[open]::details-content {
+        block-size: auto;
+      }
+    }
+  }
+</style>

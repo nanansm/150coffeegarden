@@ -1,0 +1,468 @@
+---
+/**
+ * Wedding availability calendar.
+ *
+ * Ported from legacy/wedding/main.js. The core logic there was sound and is
+ * kept: Monday-first offset, id-ID month formatting, prev/next navigation,
+ * and the WhatsApp deep link carrying the chosen date.
+ *
+ * Fixed during the port:
+ *   1. Reads /api/availability (edge-cached) instead of hitting Apps Script
+ *      directly, and drops `cache: "no-store"`.
+ *   2. Renders the grid on parse instead of only after the fetch resolves —
+ *      the old page showed "Bentar..." for the full ~4.2s cold start.
+ *   3. `new Date("2026-07-21")` parses as UTC midnight, which shifts the date
+ *      back a day for anyone in a timezone behind UTC. Now parsed from parts.
+ *   4. Past dates are disabled; they used to be selectable and lockable.
+ *   5. Cells are real <button>s in a role="grid" with roving tabindex and
+ *      full aria labels. They used to be <div>s with click handlers —
+ *      unreachable by keyboard and unannounced by screen readers.
+ *   6. Degraded and stale responses surface a visible notice instead of
+ *      silently rendering an empty calendar.
+ */
+import { WEDDING_LOCK_NUMBER } from '../data/site';
+import { LOCALE_META, type Locale } from '../i18n/config';
+import { t } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const ui = t(locale);
+
+/** Strings the client script needs, serialised into data attributes so the
+ *  bundled script stays locale-agnostic. */
+const strings = {
+  dow: ui.calendar.dow,
+  gridLabel: ui.calendar.gridLabel,
+  selectedPrefix: ui.calendar.selectedPrefix,
+  pickFirst: ui.calendar.pickFirst,
+  selectionTaken: ui.calendar.selectionTaken,
+  suffixBooked: ui.calendar.suffixBooked,
+  suffixPast: ui.calendar.suffixPast,
+  suffixFree: ui.calendar.suffixFree,
+  noticeDegraded: ui.calendar.noticeDegraded,
+  noticeStale: ui.calendar.noticeStale,
+  intlLocale: LOCALE_META[locale].htmlLang === 'id' ? 'id-ID' : 'en-GB',
+};
+---
+
+<div
+  class="cal"
+  data-wa-number={WEDDING_LOCK_NUMBER}
+  data-strings={JSON.stringify(strings)}
+  data-wa-template={ui.wa.weddingKunciTanggal('__DATE__')}
+>
+  <div class="cal__bar">
+    <button type="button" class="cal__nav" data-cal-prev aria-label={ui.calendar.prevMonth}>‹</button>
+    <h3 class="cal__title" data-cal-title>{ui.calendar.loading}</h3>
+    <button type="button" class="cal__nav" data-cal-next aria-label={ui.calendar.nextMonth}>›</button>
+  </div>
+
+  <p class="cal__notice" data-cal-notice hidden></p>
+
+  <div class="cal__legend">
+    <span class="lg"><i class="lg__dot lg__dot--free"></i>{ui.calendar.available}</span>
+    <span class="lg"><i class="lg__dot lg__dot--booked"></i>{ui.calendar.booked}</span>
+  </div>
+
+  <div class="cal__grid" role="grid" aria-label={ui.calendar.gridLabel} data-cal-grid></div>
+
+  <p class="visually-hidden" role="status" data-cal-status></p>
+
+  <div class="cal__foot">
+    <p class="cal__selected" data-cal-selected>{ui.calendar.pickFirst}</p>
+    <button type="button" class="btn btn--block" data-cal-lock disabled>
+      {ui.calendar.lock}
+    </button>
+  </div>
+</div>
+
+<style>
+  .cal {
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    padding: var(--sp-4);
+  }
+
+  .cal__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+
+  .cal__title {
+    font-size: var(--fs-h3);
+    text-align: center;
+  }
+
+  .cal__nav {
+    display: grid;
+    place-content: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-full);
+    color: var(--green-600);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .cal__nav[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .cal__notice {
+    margin-block-start: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+    border-left: 3px solid var(--accent);
+    background: var(--neutral-100);
+    font-size: var(--fs-sm);
+  }
+
+  .cal__legend {
+    display: flex;
+    gap: var(--sp-6);
+    margin-block: var(--sp-4);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+
+  .lg {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+
+  .lg__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--r-full);
+  }
+
+  .lg__dot--free {
+    background: var(--accent);
+  }
+
+  .lg__dot--booked {
+    background: var(--border-strong);
+  }
+
+  .cal__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal__grid :global(.dow) {
+    padding-block: var(--sp-2);
+    text-align: center;
+    font-size: var(--fs-xs);
+    color: var(--text-caption);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .cal__grid :global(.cell) {
+    display: grid;
+    place-content: center;
+    min-height: 44px;
+    padding: 0;
+    background: var(--white);
+    border: 1px solid transparent;
+    border-radius: var(--r-sm);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-sm);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .cal__grid :global(.cell:hover) {
+    border-color: var(--border-strong);
+  }
+
+  .cal__grid :global(.cell--pad) {
+    background: none;
+    cursor: default;
+  }
+
+  .cal__grid :global(.cell--booked),
+  .cal__grid :global(.cell--past) {
+    background: none;
+    color: var(--text-caption);
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  .cal__grid :global(.cell--past) {
+    text-decoration: none;
+    opacity: 0.4;
+  }
+
+  .cal__grid :global(.cell--selected) {
+    background: var(--green-600);
+    color: var(--white);
+    border-color: var(--green-600);
+  }
+
+  .cal__foot {
+    display: grid;
+    gap: var(--sp-3);
+    margin-block-start: var(--sp-6);
+    padding-block-start: var(--sp-4);
+    border-top: 1px solid var(--border);
+  }
+
+  .cal__selected {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+
+  .cal__foot .btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  @media (min-width: 30rem) {
+    .cal {
+      padding: var(--sp-6);
+    }
+
+    .cal__foot {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+</style>
+
+<script>
+  interface CalStrings {
+    dow: string[];
+    gridLabel: string;
+    selectedPrefix: string;
+    pickFirst: string;
+    selectionTaken: string;
+    suffixBooked: string;
+    suffixPast: string;
+    suffixFree: string;
+    noticeDegraded: string;
+    noticeStale: string;
+    intlLocale: string;
+  }
+
+  const root = document.querySelector<HTMLElement>('.cal');
+
+  if (root?.dataset.strings) {
+    const S: CalStrings = JSON.parse(root.dataset.strings);
+    const waNumber = root.dataset.waNumber!;
+    const waTemplate = root.dataset.waTemplate!;
+
+    const grid = root.querySelector<HTMLElement>('[data-cal-grid]')!;
+    const title = root.querySelector<HTMLElement>('[data-cal-title]')!;
+    const notice = root.querySelector<HTMLElement>('[data-cal-notice]')!;
+    const status = root.querySelector<HTMLElement>('[data-cal-status]')!;
+    const selectedOut = root.querySelector<HTMLElement>('[data-cal-selected]')!;
+    const lockBtn = root.querySelector<HTMLButtonElement>('[data-cal-lock]')!;
+    const prevBtn = root.querySelector<HTMLButtonElement>('[data-cal-prev]')!;
+    const nextBtn = root.querySelector<HTMLButtonElement>('[data-cal-next]')!;
+
+    const booked = new Set<string>();
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const firstAllowed = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    let view = new Date(today.getFullYear(), today.getMonth(), 1);
+    let selected: string | null = null;
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const toKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    /** Parse from parts. `new Date("2026-07-21")` is UTC midnight, which
+     *  renders as the previous day for anyone behind UTC. */
+    const fromKey = (key: string) => {
+      const [y, m, d] = key.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    };
+
+    const longDate = (d: Date) =>
+      d.toLocaleDateString(S.intlLocale, {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+
+    function render() {
+      const y = view.getFullYear();
+      const m = view.getMonth();
+
+      title.textContent = view.toLocaleString(S.intlLocale, { month: 'long', year: 'numeric' });
+      prevBtn.disabled = view <= firstAllowed;
+
+      grid.replaceChildren();
+
+      for (const name of S.dow) {
+        const el = document.createElement('div');
+        el.className = 'dow';
+        el.setAttribute('role', 'columnheader');
+        el.textContent = name;
+        grid.append(el);
+      }
+
+      const startPad = (new Date(y, m, 1).getDay() + 6) % 7; // Monday = 0
+      for (let i = 0; i < startPad; i++) {
+        const el = document.createElement('div');
+        el.className = 'cell cell--pad';
+        grid.append(el);
+      }
+
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+      // Work out the single tab stop up front. Deciding it inside the loop
+      // gave TWO cells tabIndex=0 whenever a selection existed, which breaks
+      // the roving-tabindex contract, and could also land the stop on a
+      // disabled cell.
+      let tabStopKey: string | null = null;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(y, m, d);
+        const key = toKey(date);
+        if (date < today || booked.has(key)) continue;
+        if (key === selected) { tabStopKey = key; break; }
+        if (tabStopKey === null) tabStopKey = key;
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(y, m, d);
+        const key = toKey(date);
+        const isPast = date < today;
+        const isBooked = booked.has(key);
+        const disabled = isPast || isBooked;
+
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = 'cell';
+        cell.textContent = String(d);
+        cell.setAttribute('role', 'gridcell');
+        cell.dataset.key = key;
+
+        if (isPast) cell.classList.add('cell--past');
+        if (isBooked) cell.classList.add('cell--booked');
+        if (key === selected) cell.classList.add('cell--selected');
+
+        const suffix = isBooked ? S.suffixBooked : isPast ? S.suffixPast : S.suffixFree;
+        cell.setAttribute('aria-label', longDate(date) + suffix);
+
+        if (disabled) {
+          cell.setAttribute('aria-disabled', 'true');
+          cell.tabIndex = -1;
+        } else {
+          cell.setAttribute('aria-pressed', String(key === selected));
+          cell.tabIndex = key === tabStopKey ? 0 : -1;
+          cell.addEventListener('click', () => select(key));
+        }
+
+        grid.append(cell);
+      }
+    }
+
+    /** Drop a selection that the freshly-loaded data says is unavailable. The
+     *  grid renders before the fetch resolves, so a visitor can pick a date
+     *  that turns out to be booked; without this the Lock button stayed live
+     *  and opened WhatsApp asking for a date already taken. */
+    function revalidateSelection() {
+      if (!selected) return;
+      const stillFree = !booked.has(selected) && fromKey(selected) >= today;
+      if (stillFree) return;
+      selected = null;
+      lockBtn.disabled = true;
+      selectedOut.textContent = S.selectionTaken;
+      status.textContent = S.selectionTaken;
+    }
+
+    function select(key: string) {
+      selected = key;
+      const label = longDate(fromKey(key));
+
+      selectedOut.textContent = `${S.selectedPrefix} ${label}`;
+      status.textContent = label;
+      lockBtn.disabled = false;
+      render();
+
+      grid.querySelector<HTMLButtonElement>(`[data-key="${key}"]`)?.focus();
+    }
+
+    // Arrow-key navigation across the grid.
+    grid.addEventListener('keydown', (e) => {
+      const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key];
+      if (!step) return;
+
+      // Only selectable cells: stepping onto a booked or past cell would park
+      // the tab stop somewhere the user cannot act on.
+      const cells = [...grid.querySelectorAll<HTMLButtonElement>(
+        '.cell:not(.cell--pad):not([aria-disabled="true"])',
+      )];
+      const from = cells.indexOf(document.activeElement as HTMLButtonElement);
+      if (from === -1) return;
+
+      e.preventDefault();
+      const target = cells[from + step];
+      if (target) {
+        cells.forEach((c) => (c.tabIndex = -1));
+        target.tabIndex = 0;
+        target.focus();
+      }
+    });
+
+    prevBtn.addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+      render();
+      status.textContent = title.textContent ?? '';
+    });
+
+    nextBtn.addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+      render();
+      status.textContent = title.textContent ?? '';
+    });
+
+    lockBtn.addEventListener('click', () => {
+      if (!selected) return;
+      const message = waTemplate.replace('__DATE__', longDate(fromKey(selected)));
+      window.open(
+        `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`,
+        '_blank',
+        'noopener,noreferrer',
+      );
+      window.dispatchEvent(new CustomEvent('wa:contact', { detail: { source: 'calendar' } }));
+    });
+
+    // Render immediately so the grid is usable during the fetch, then overlay
+    // booked dates when the data lands. The legacy page showed a placeholder
+    // for the whole ~4.2s Apps Script cold start.
+    render();
+
+    fetch('/api/availability')
+      .then((r) => r.json())
+      .then((data: { ok?: boolean; stale?: boolean; degraded?: boolean; dates?: string[] }) => {
+        (data.dates ?? []).forEach((d) => booked.add(d));
+        revalidateSelection();
+        if (data.degraded || data.stale) {
+          notice.hidden = false;
+          notice.textContent = data.degraded ? S.noticeDegraded : S.noticeStale;
+        }
+        render();
+      })
+      .catch(() => {
+        notice.hidden = false;
+        notice.textContent = S.noticeDegraded;
+      });
+  }
+</script>

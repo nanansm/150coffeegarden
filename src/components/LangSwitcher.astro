@@ -1,0 +1,95 @@
+---
+/**
+ * ID / EN switcher, styled as a segmented pill so it reads as a control
+ * rather than two loose links.
+ *
+ * Still plain anchors: zero JavaScript, crawlable, and each one points at the
+ * equivalent URL in the other locale — not back to the homepage, which is the
+ * usual bug in language switchers.
+ *
+ * Browser-language auto-redirect was rejected: it needs edge logic, makes URLs
+ * unstable for Google, and guesses wrong for the many Indonesians whose phone
+ * is set to English.
+ */
+import { LOCALE_META, localizedPath, type Locale } from '../i18n/config';
+import { t } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  /** Locale-agnostic route key, e.g. "/wedding/". */
+  route: string;
+  class?: string;
+}
+
+const { locale, route, class: className = '' } = Astro.props;
+const ui = t(locale);
+
+/** Display order is fixed ID → EN regardless of which one is default. */
+const ORDER: Locale[] = ['id', 'en'];
+---
+
+<div class:list={['lang', className]} role="group" aria-label={ui.nav.langLabel}>
+  {
+    ORDER.map((loc) => (
+      <a
+        class:list={['lang__opt', loc === locale && 'is-active']}
+        href={localizedPath(route, loc)}
+        hreflang={LOCALE_META[loc].htmlLang}
+        lang={LOCALE_META[loc].htmlLang}
+        aria-current={loc === locale ? 'true' : undefined}
+      >
+        {LOCALE_META[loc].label}
+      </a>
+    ))
+  }
+</div>
+
+<style>
+  .lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    background: var(--neutral-100);
+    border-radius: var(--r-full);
+  }
+
+  .lang__opt {
+    display: grid;
+    place-content: center;
+    min-width: 2.5rem;
+    min-height: 1.9rem;
+    padding-inline: var(--sp-3);
+    border-radius: var(--r-full);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--ink-400);
+    text-decoration: none;
+    transition:
+      background var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+
+  .lang__opt:hover {
+    color: var(--ink-600);
+  }
+
+  /* The active segment lifts out of the track on a white chip. */
+  .lang__opt.is-active {
+    background: var(--white);
+    color: var(--green-600);
+    box-shadow: 0 1px 2px rgb(28 26 24 / 0.12);
+  }
+
+  .lang__opt.is-active:hover {
+    color: var(--green-600);
+  }
+
+  @media (min-width: 64rem) {
+    .lang__opt {
+      min-height: 2.1rem;
+    }
+  }
+</style>

@@ -1,0 +1,85 @@
+---
+/**
+ * Mobile-only sticky CTA bar.
+ *
+ * Appears after the sentinel scrolls out of view, detected with an
+ * IntersectionObserver rather than a scroll listener — no per-frame work,
+ * no INP cost.
+ *
+ * The legacy version had href="#" on its WhatsApp button with no JS to fill
+ * it in, so it was a dead link. This renders a real href at build time.
+ */
+import WhatsAppCTA from './WhatsAppCTA.astro';
+
+interface Props {
+  number: string;
+  message: string;
+  anchorHref: string;
+  anchorLabel: string;
+  waLabel: string;
+}
+
+const { number, message, anchorHref, anchorLabel, waLabel } = Astro.props;
+---
+
+<div class="sticky" data-sticky hidden>
+  <a class="btn btn--ghost sticky__btn" href={anchorHref}>{anchorLabel}</a>
+  <WhatsAppCTA {number} {message} label={waLabel} class="sticky__btn" />
+</div>
+
+<style>
+  .sticky {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: var(--z-sticky);
+    display: flex;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--gutter) calc(var(--sp-3) + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    /* Floats above the page, so a shadow is justified here. */
+    box-shadow: var(--shadow-md);
+  }
+
+  :global(.sticky__btn) {
+    flex: 1;
+    min-height: 46px;
+  }
+
+  .sticky[hidden] {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .sticky {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-sticky]');
+  const main = document.getElementById('main');
+
+  if (bar && main) {
+    // The sentinel has to sit at the TOP of the page. This component renders
+    // at the very bottom, so a markup sentinel would land there and the bar
+    // would stay visible until the visitor reached the footer.
+    const sentinel = document.createElement('div');
+    sentinel.setAttribute('aria-hidden', 'true');
+    main.prepend(sentinel);
+
+    // Positive top rootMargin extends the root 400px ABOVE the viewport, so
+    // the top-of-page sentinel still counts as intersecting until the visitor
+    // has scrolled roughly a screen. Intersecting => near the top => hide the
+    // bar, because the hero already carries a full-width CTA there.
+    new IntersectionObserver(
+      ([entry]) => {
+        bar.hidden = entry.isIntersecting;
+      },
+      { rootMargin: '400px 0px 0px 0px' },
+    ).observe(sentinel);
+  }
+</script>

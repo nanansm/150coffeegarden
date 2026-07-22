@@ -1,0 +1,41 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://www.facebook.com https://cdn.150coffeegarden.com; script-src 'self' 'unsafe-inline' https://connect.facebook.net; connect-src 'self' https://www.facebook.com; style-src 'self' 'unsafe-inline'; font-src 'self'; media-src 'self' https://cdn.150coffeegarden.com; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+
+# Content-hashed by the build, so these can never go stale.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+/brand/*
+  Cache-Control: public, max-age=604800
+
+/og/*
+  Cache-Control: public, max-age=604800
+
+# HTML must revalidate so a deploy is visible immediately.
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# NOTE: no /api/* rule here on purpose. _headers is applied to Function
+# responses too and OVERRIDES them, so a rule here silently stripped the
+# s-maxage that functions/api/availability.ts sets per response — which is the
+# entire reason that Function exists. The Function owns its own caching.
+
+# NOTE on the CSP above:
+#   frame-src 'none' — the site embeds no third-party frames at all. The
+#     Instagram embed was tested and dropped: its iframe renders Instagram's
+#     own chrome (profile row, like count, comment box) which cannot be
+#     stripped, and it shows no video to logged-out visitors. If an embed is
+#     ever reintroduced, this needs the specific host allow-listed.
+#   'unsafe-inline' in script-src is needed by the Meta Pixel bootstrap and
+#     Astro's inline module scripts. Removing it needs a nonce, which needs
+#     SSR, which this site deliberately does not use.
+#   HSTS ships without `preload` on purpose: preload is effectively
+#     irreversible, so add it only once every subdomain is confirmed HTTPS.

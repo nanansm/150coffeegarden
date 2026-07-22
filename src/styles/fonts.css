@@ -1,0 +1,77 @@
+/* ============================================================
+   Self-hosted fonts.
+
+   The legacy site loaded PP Neue Montreal from fonts.cdnfonts.com.
+   That is a commercial retail face from Pangram Pangram being
+   redistributed without a license — using it on a business site is an
+   unlicensed commercial deployment, so it has been removed entirely
+   and cannot be self-hosted either.
+
+   Replacements:
+     Display  Space Grotesk  (OFL)      — already part of the brand
+     Body     General Sans   (Fontshare, free for commercial use)
+                                        — closest free analogue to
+                                          PP Neue Montreal's neutral geometry
+
+   Archivo Black is dropped: Space Grotesk 700 covers every display use,
+   which removes a whole family and a request.
+
+   All files are subset to latin and served immutable from /fonts/.
+   ============================================================ */
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/general-sans-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/general-sans-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Google serves Space Grotesk as a variable font: the same file covers the
+   whole 300-700 axis, so one 21.8 KB request replaces the two static weights
+   the plan budgeted for. Declared as a weight RANGE, not a single value. */
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/space-grotesk.woff2') format('woff2-variations');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------------
+   Metric-matched fallbacks.
+
+   `font-display: swap` shows the fallback first, so the swap causes a
+   reflow unless the fallback's metrics match. These overrides tune the
+   system font to General Sans / Space Grotesk metrics, keeping the CLS
+   contribution near zero.
+
+   TODO(phase-4): recompute these against the actual subset files with
+   the Fallback Font Generator and verify CLS < 0.01 in Lighthouse.
+   ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: 'General Sans Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('system-ui');
+  size-adjust: 100%;
+  ascent-override: 95%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Space Grotesk Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('system-ui');
+  size-adjust: 100%;
+  ascent-override: 98%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}

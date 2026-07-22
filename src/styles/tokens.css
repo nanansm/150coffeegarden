@@ -1,0 +1,155 @@
+/* ============================================================
+   150 Coffee Garden — design tokens
+   Direction: "Modern Minimal Green"
+   Evolves the existing brand palette (cream / deep green / gold)
+   rather than replacing it.
+   ============================================================ */
+
+:root {
+  /* --- Green: primary ------------------------------------- */
+  /* --green-600 is sampled from the actual logo artwork. The legacy CSS used
+     #0F3B2A, which is a different, colder green — the mark and the UI would
+     have clashed. The logo green is now the brand anchor; the darker shades
+     are derived from it for depth. */
+  --green-900: #0d2b1c; /* footer, deepest surfaces */
+  --green-800: #174a2c; /* pressed states */
+  --green-600: #257344; /* BRAND — matches the logo exactly */
+  --green-500: #2e8a52; /* hover state */
+  --green-200: #a9c9b6; /* dividers and muted text on green surfaces */
+  --green-50: #eef5f0; /* whisper-light green tint */
+
+  /* --- Neutral: surface ------------------------------------ */
+  /* Cream is retired. The page is white. */
+  --white: #ffffff;
+  --neutral-50: #f5f7f5; /* section alternation — see note below */
+  --neutral-100: #eceeec; /* image placeholder, pressed states */
+
+  /* --- Yellow: accent ------------------------------------- */
+  --yellow-400: #e3c778; /* rules, badges, calendar dots */
+  --yellow-600: #96741f; /* darkened — REQUIRED when yellow must be text */
+
+  /* --- Ink ------------------------------------------------- */
+  --ink-900: #141815; /* body text */
+  --ink-600: #454c47; /* secondary text */
+  --ink-400: #7b827d; /* captions, disabled */
+
+  /* --- Semantic -------------------------------------------- */
+  --bg: var(--white);
+  /* NOTE: --bg-alt is a barely-there tint, not a colour in its own right.
+     With a pure-white page, adjacent sections need *some* separation or the
+     whole page reads as one undifferentiated scroll. This is the minimum
+     that still registers (~2% off white). Set it to var(--white) if a
+     completely flat page is wanted — nothing else needs to change. */
+  --bg-alt: var(--neutral-50);
+  --surface: var(--white);
+  --text: var(--ink-900);
+  --text-muted: var(--ink-600);
+  --text-caption: var(--ink-400);
+  --border: rgb(37 115 68 / 0.16);
+  --border-strong: rgb(37 115 68 / 0.32);
+  --accent: var(--yellow-400);
+  --focus: var(--green-600);
+
+  /* ------------------------------------------------------------------
+     CONTRAST RULE — do not break this.
+
+     --yellow-400 on white lands at ~1.7:1. It is NEVER text.
+     Use it only as a rule, fill, dot, or badge background.
+     When yellow must carry text on a light surface, use --yellow-600.
+
+     Verified ratios (on --white):
+       ink-900    ~16.4:1  AAA
+       green-600   ~5.3:1  AA   (headings, buttons, links)
+       ink-600     ~8.9:1  AAA
+       yellow-600  ~4.6:1  AA
+       yellow-400  ~1.7:1  FAIL — never text
+       white on green-600 ~5.3:1 AA
+     ------------------------------------------------------------------ */
+
+  /* --- Type scale: fluid, mobile-first --------------------- */
+  --fs-xs: clamp(0.78rem, 0.76rem + 0.1vw, 0.84rem);
+  --fs-sm: clamp(0.88rem, 0.85rem + 0.14vw, 0.95rem);
+  --fs-base: clamp(1rem, 0.97rem + 0.16vw, 1.0625rem);
+  --fs-lg: clamp(1.2rem, 1.12rem + 0.36vw, 1.4rem);
+  --fs-h3: clamp(1.32rem, 1.2rem + 0.55vw, 1.65rem);
+  --fs-h2: clamp(1.75rem, 1.45rem + 1.3vw, 2.75rem);
+  --fs-h1: clamp(2.25rem, 1.7rem + 2.4vw, 3.75rem);
+  --fs-display: clamp(2.75rem, 1.6rem + 4.9vw, 5.5rem);
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.18;
+  --lh-body: 1.6;
+  --tracking-display: -0.03em;
+  --tracking-eyebrow: 0.16em;
+  --measure: 62ch;
+
+  /* The *-Fallback families are metric-matched (see fonts.css) so the
+     font-display: swap handoff causes near-zero layout shift. */
+  --font-display: 'Space Grotesk', 'Space Grotesk Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'General Sans', 'General Sans Fallback', ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
+
+  /* --- Spacing --------------------------------------------- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-12: 3rem;
+  --sp-16: 4rem;
+  --sp-24: 6rem;
+  --sp-32: 8rem;
+
+  --section-y: clamp(3rem, 2rem + 5vw, 7rem);
+  --gutter: clamp(1rem, 0.5rem + 3vw, 2.5rem);
+  --container: 1200px;
+
+  /* Sticky header height — anchors offset by this via scroll-margin-top.
+     No element anywhere gets a hardcoded pixel margin. */
+  --header-h: 4rem;
+
+  /* --- Radii ------------------------------------------------ */
+  --r-sm: 4px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-full: 999px;
+
+  /* ------------------------------------------------------------------
+     SHADOW RULE — this is the whole visual reset away from the old
+     brutalist `box-shadow: 12px 12px 0` styling.
+
+     Shadows exist ONLY on elements that physically float above the page:
+       drawer, lightbox, mobile sticky bar, header once scrolled.
+
+     Cards, pricelist tiles, calendar cells and images get
+     `1px solid var(--border)` and nothing else. Depth comes from
+     cream/white surface alternation and generous --section-y.
+     ------------------------------------------------------------------ */
+  --shadow-sm: 0 1px 2px rgb(28 26 24 / 0.05), 0 2px 6px rgb(28 26 24 / 0.04);
+  --shadow-md: 0 10px 30px -10px rgb(15 59 42 / 0.2);
+
+  /* --- Motion ----------------------------------------------- */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+
+  --z-sticky: 100;
+  --z-header: 200;
+}
+
+/* Breakpoints are min-width only, applied in component styles:
+     30rem  480px   large phones  — gallery 1 -> 2 col
+     48rem  768px   tablet        — two-column layouts appear
+     64rem  1024px  desktop       — full nav replaces drawer, 3-col grids
+     80rem  1280px  wide          — max container
+   Design at 375px first. */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
+}

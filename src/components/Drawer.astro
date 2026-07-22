@@ -1,0 +1,212 @@
+---
+/**
+ * Mobile navigation drawer.
+ *
+ * Built on native <dialog> + showModal(), which gives us focus trapping,
+ * Esc to close, an inert background and top-layer stacking for free — no
+ * z-index war, no focus-trap library, ~15 lines of JS.
+ *
+ * The CSS-only checkbox hack was rejected: zero JS, but no focus trap, no
+ * Esc, and a screen-reader-hostile hidden input.
+ */
+import { links, wa } from '../data/site';
+import { localizedPath, type Locale } from '../i18n/config';
+import { t } from '../i18n/ui';
+import WhatsAppCTA from './WhatsAppCTA.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const ui = t(locale);
+
+const items = [
+  { label: ui.nav.home, href: localizedPath('/', locale) },
+  { label: ui.nav.wedding, href: localizedPath('/wedding/', locale) },
+  { label: ui.nav.menu, href: links.menuPdf, external: true },
+  { label: ui.nav.location, href: `${localizedPath('/', locale)}#lokasi` },
+];
+---
+
+<dialog id="drawer" class="drawer" aria-label={ui.nav.drawerLabel}>
+  <div class="drawer__panel">
+    <div class="drawer__head">
+      <span class="drawer__title">{ui.nav.menu}</span>
+      <button type="button" class="drawer__close" aria-label={ui.nav.closeMenu} data-drawer-close>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path
+            d="M6 6l12 12M18 6L6 18"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="drawer__nav">
+      {
+        items.map((item) => (
+          <a
+            class="drawer__link"
+            href={item.href}
+            target={item.external ? '_blank' : undefined}
+            rel={item.external ? 'noopener' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <WhatsAppCTA
+      number={wa.reservasi}
+      message={ui.wa.reservasi}
+      label={ui.nav.reserve}
+      block
+    />
+
+    <p class="drawer__note">{ui.common.brandTagline}</p>
+  </div>
+</dialog>
+
+<style>
+  .drawer {
+    /* The drawer floats above the page, so a shadow is justified here.
+       Cards and images get a 1px border instead — see tokens.css. */
+    margin: 0 0 0 auto;
+    max-width: 22rem;
+    width: 88%;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding: 0;
+    border: 0;
+    background: var(--bg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+
+  .drawer::backdrop {
+    background: rgb(10 43 30 / 0.45);
+  }
+
+  .drawer__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    height: 100%;
+    padding: var(--sp-6) var(--sp-6) calc(var(--sp-6) + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .drawer__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .drawer__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .drawer__close {
+    display: grid;
+    place-content: center;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-full);
+    color: var(--green-600);
+    cursor: pointer;
+  }
+
+  .drawer__nav {
+    display: grid;
+    gap: var(--sp-1);
+  }
+
+  .drawer__link {
+    display: block;
+    padding: var(--sp-3) 0;
+    min-height: 48px;
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .drawer__note {
+    margin-block-start: auto;
+    font-size: var(--fs-xs);
+    color: var(--text-caption);
+  }
+
+  /* Slide-in with @starting-style: no JS animation, and it degrades to an
+     instant open where unsupported. */
+  @media (prefers-reduced-motion: no-preference) {
+    .drawer {
+      translate: 100% 0;
+      transition:
+        translate var(--dur-slow) var(--ease),
+        display var(--dur-slow) allow-discrete,
+        overlay var(--dur-slow) allow-discrete;
+    }
+
+    .drawer[open] {
+      translate: 0 0;
+    }
+
+    @starting-style {
+      .drawer[open] {
+        translate: 100% 0;
+      }
+    }
+  }
+
+  /* Deliberately NOT `display: none` at this breakpoint. A <dialog> opened on
+     a narrow viewport stays in the top layer when the window is resized past
+     1024px; hiding it visually left the page inert and unclickable with no
+     visible way out. The script closes it on resize instead. */
+</style>
+
+<script>
+  const drawer = document.getElementById('drawer') as HTMLDialogElement | null;
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-drawer-open]');
+
+  if (drawer && openBtn) {
+    const close = () => {
+      drawer.close();
+      openBtn.setAttribute('aria-expanded', 'false');
+    };
+
+    openBtn.addEventListener('click', () => {
+      drawer.showModal();
+      openBtn.setAttribute('aria-expanded', 'true');
+    });
+
+    drawer.querySelector('[data-drawer-close]')?.addEventListener('click', close);
+
+    // A backdrop click targets the dialog element itself, not the panel.
+    drawer.addEventListener('click', (e) => {
+      if (e.target === drawer) close();
+    });
+
+    // Let the anchor navigate, then close.
+    drawer.querySelectorAll('a').forEach((a) => a.addEventListener('click', close));
+
+    // Esc is handled natively by <dialog>; keep aria-expanded in sync.
+    drawer.addEventListener('close', () => openBtn.setAttribute('aria-expanded', 'false'));
+
+    // Past the desktop breakpoint the burger disappears, so an open drawer
+    // would be unreachable while still holding the page inert. Close it.
+    const desktop = window.matchMedia('(min-width: 64rem)');
+    desktop.addEventListener('change', (e) => {
+      if (e.matches && drawer.open) close();
+    });
+  }
+</script>

@@ -1,0 +1,953 @@
+---
+/**
+ * Home page — treated as a paid landing page, not a brochure.
+ * The Instagram bio link and Meta Ads both point here.
+ *
+ * Running order, and the job each section does:
+ *   hero          the emotional promise: shade and quiet, inside the city
+ *   facts         kills the three questions that stop a walk-in
+ *   intent router four reasons people come, each with its own CTA, so ad
+ *                 traffic self-segments instead of bouncing
+ *   kitchen       people choose a café on food; pasta is the signature
+ *   location      highest-intent block for a café; address taps into Maps
+ *   gallery       proof the place looks like the ad
+ *   story         the café -> wedding narrative the business already tells
+ *   proof         35k followers and Google reviews
+ *   more          menu / review / badminton / careers, demoted on purpose
+ *
+ * Positioning comes from the account's own language: "Tranquility Nature and
+ * Cup of Coffee", #Hiddengembandung, and captions that lean on adem / asri /
+ * tenang. The differentiator is shade and calm inside East Bandung, not a
+ * drive up to Lembang.
+ *
+ * IMAGES: every source is 864x1080 (4:5). No aspect-ratio is forced anywhere,
+ * so nothing is cropped — a forced 4/3 or 16/10 was cutting exactly the wide
+ * greenery that does the selling. Astro emits width/height, so natural ratio
+ * costs no layout shift.
+ */
+import { Picture } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WhatsAppCTA from '../WhatsAppCTA.astro';
+import Gallery, { type GalleryPhoto } from '../Gallery.astro';
+import Faq from '../Faq.astro';
+import StickyBar from '../StickyBar.astro';
+import VideoPlayer from '../VideoPlayer.astro';
+
+import posterPasta from '../../assets/photos/video/pasta.jpg';
+import posterHiddenGem from '../../assets/photos/video/hiddengem.jpg';
+import posterHero from '../../assets/photos/video/hero.jpg';
+import { addressLine, hours, links, nap, site, wa } from '../../data/site';
+import { localizedPath, LOCALE_META, type Locale } from '../../i18n/config';
+import { t, START_PRICE_IDR } from '../../i18n/ui';
+
+import lawnWide from '../../assets/photos/home/lawn-wide.jpg';
+import gardenChairs from '../../assets/photos/home/garden-chairs.jpg';
+import lawnPeople from '../../assets/photos/home/lawn-people.jpg';
+import picnicFood from '../../assets/photos/home/picnic-food.jpg';
+import weddingCard from '../../assets/photos/home/wedding-card.jpg';
+import lawnPicnic from '../../assets/photos/home/lawn-picnic.webp';
+import pavilionWork from '../../assets/photos/home/pavilion-work.webp';
+import eventLawn from '../../assets/photos/home/event-lawn.webp';
+import familyPicnic from '../../assets/photos/home/family-picnic.webp';
+import kidsActivity from '../../assets/photos/home/kids-activity.jpg';
+import familyMats from '../../assets/photos/home/family-mats.jpg';
+import weddingPergola from '../../assets/photos/wedding/garden-setup.webp';
+import weddingProcession from '../../assets/photos/wedding/procession.jpg';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const ui = t(locale);
+const ROUTE = '/';
+const weddingHref = localizedPath('/wedding/', locale);
+
+const waReserve = `https://wa.me/${wa.reservasi}?text=${encodeURIComponent(ui.wa.reservasi)}`;
+const waEvent = `https://wa.me/${wa.reservasi}?text=${encodeURIComponent(ui.wa.event)}`;
+
+const uses = [
+  {
+    img: gardenChairs,
+    alt: ui.photos.gardenChairs.alt,
+    title: ui.home.doCafe,
+    body: ui.home.doCafeBody,
+    cta: ui.home.doCafeCta,
+    href: links.menuPdf,
+    external: true,
+  },
+  {
+    img: lawnPicnic,
+    alt: ui.photos.home.lawnPicnic.alt,
+    title: ui.home.doGather,
+    body: ui.home.doGatherBody,
+    cta: ui.home.doGatherCta,
+    href: waReserve,
+    external: true,
+    wa: true,
+  },
+  {
+    img: eventLawn,
+    alt: ui.photos.home.eventLawn.alt,
+    title: ui.home.doEvent,
+    body: ui.home.doEventBody,
+    cta: ui.home.doEventCta,
+    href: waEvent,
+    external: true,
+    wa: true,
+  },
+  {
+    img: weddingCard,
+    alt: ui.photos.decorChandelier.alt,
+    title: ui.home.doWedding,
+    body: ui.home.doWeddingBody,
+    cta: ui.home.doWeddingCta,
+    href: weddingHref,
+    external: false,
+    prefetch: true,
+  },
+];
+
+// Exactly six for a clean 3-column grid. The night-sparkler shot was a wedding
+// image and belongs on the wedding page, not in the everyday-place gallery.
+const photos: GalleryPhoto[] = [
+  { src: lawnPeople, ...ui.photos.lawnPeople },
+  { src: eventLawn, ...ui.photos.home.eventLawn },
+  { src: familyPicnic, ...ui.photos.home.familyPicnic },
+  { src: kidsActivity, ...ui.photos.kidsActivity },
+  { src: familyMats, ...ui.photos.familyMats },
+  { src: pavilionWork, ...ui.photos.home.pavilionWork },
+];
+
+const facts = [
+  { label: ui.home.factHours, value: ui.home.factHoursValue },
+  { label: ui.home.factArea, value: ui.home.factAreaValue },
+  { label: ui.home.factParking, value: ui.home.factParkingValue },
+];
+
+const pageUrl = new URL(localizedPath(ROUTE, locale), site.url).href;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Restaurant',
+      '@id': `${site.url}/#business`,
+      name: site.name,
+      alternateName: site.legalName,
+      description: ui.home.description,
+      url: pageUrl,
+      inLanguage: LOCALE_META[locale].htmlLang,
+      telephone: `+${wa.reservasi}`,
+      priceRange: 'Rp',
+      servesCuisine: ['Coffee', 'Pasta', 'Indonesian'],
+      hasMenu: links.menuPdf,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: nap.street,
+        addressLocality: nap.district,
+        addressRegion: nap.region,
+        postalCode: nap.postalCode,
+        addressCountry: nap.country,
+      },
+      geo: { '@type': 'GeoCoordinates', latitude: nap.geo.lat, longitude: nap.geo.lng },
+      // '24:00' is the correct encoding for a midnight close; '00:00' would
+      // mean the start of the same day.
+      openingHoursSpecification: hours.map((h) => ({
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: h.days.map((d) => `https://schema.org/${d}`),
+        opens: h.open,
+        closes: h.close,
+      })),
+      amenityFeature: [
+        { '@type': 'LocationFeatureSpecification', name: 'Outdoor seating', value: true },
+      ],
+      sameAs: [links.instagram, links.facebook, nap.mapsUrl],
+      makesOffer: {
+        '@type': 'Offer',
+        name: ui.home.storyEyebrow,
+        price: START_PRICE_IDR,
+        priceCurrency: 'IDR',
+        url: new URL(weddingHref, site.url).href,
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${site.url}/#website`,
+      url: site.url,
+      name: site.name,
+      inLanguage: LOCALE_META[locale].htmlLang,
+      publisher: { '@id': `${site.url}/#business` },
+    },
+    {
+      '@type': 'FAQPage',
+      inLanguage: LOCALE_META[locale].htmlLang,
+      mainEntity: ui.home.homeFaq.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a },
+      })),
+    },
+  ],
+};
+---
+
+<BaseLayout title={ui.home.title} description={ui.home.description} route={ROUTE} {locale}>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+
+  {/* 1 — Hero. The thesis is the garden itself, moving, with the city roofline
+      visible behind it. A 16:9 video forced into a narrow column would read as
+      an afterthought, so it runs full width beneath the headline instead.
+      Click to play: zero bytes until then, and never autoplay. */}
+  <section class="hero">
+    <div class="container hero__inner">
+      <h1>{ui.home.h1}</h1>
+      <p class="hero__lead">{ui.home.lead}</p>
+
+      <div class="hero__cta">
+        <WhatsAppCTA
+          number={wa.reservasi}
+          message={ui.wa.reservasi}
+          label={ui.home.ctaReserve}
+          block
+        />
+        <a class="btn btn--ghost btn--block" href={links.menuPdf} target="_blank" rel="noopener">
+          {ui.common.viewMenu}
+        </a>
+      </div>
+
+      <p class="hero__open">
+        <span class="dot" aria-hidden="true"></span>
+        {ui.home.openNow}
+      </p>
+    </div>
+
+    <div class="hero__film">
+      <VideoPlayer
+        name="hero"
+        poster={posterHero}
+        title={ui.home.h1}
+        label={ui.home.heroVideoLabel}
+        wide
+      />
+    </div>
+  </section>
+
+  {/* 2 — Facts strip: open? outdoor? far? answered before anyone has to hunt. */}
+  <section class="facts">
+    <dl class="container facts__grid">
+      {
+        facts.map((fact) => (
+          <div class="fact">
+            <dt>{fact.label}</dt>
+            <dd>{fact.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  {/* 3 — Intent router. Four jobs, four CTAs. */}
+  <section class="section" id="tentang">
+    <div class="container">
+      <h2>{ui.home.doTitle}</h2>
+      <p class="lead">{ui.home.doLead}</p>
+
+      <div class="uses">
+        {
+          uses.map((use) => (
+            <article class="use">
+              <Picture
+                src={use.img}
+                formats={['avif', 'webp']}
+                fallbackFormat="webp"
+                widths={[400, 640, 828]}
+                sizes="(min-width: 64rem) 25vw, (min-width: 30rem) 50vw, 100vw"
+                quality={60}
+                alt={use.alt}
+                loading="lazy"
+              />
+              <div class="use__body">
+                <h3>{use.title}</h3>
+                <p>{use.body}</p>
+                <a
+                  class="use__cta"
+                  href={use.href}
+                  target={use.external ? '_blank' : undefined}
+                  rel={use.external ? 'noopener' : undefined}
+                  data-wa={use.wa ? '' : undefined}
+                  data-astro-prefetch={use.prefetch ? '' : undefined}
+                >
+                  {use.cta}
+                </a>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* 4 — The kitchen. People pick a café on food, and pasta is the item the
+      account says is most asked for. Text-led until real food photography
+      arrives; a stock-looking plate would undercut the whole page. */}
+  <section class="section section--alt" id="menu">
+    <div class="container">
+      <div class="food__grid">
+        <div>
+          <h2 class="food__title">{ui.home.foodTitle}</h2>
+          <p class="lead">{ui.home.foodLead}</p>
+          <ul class="food__list">
+            {ui.home.foodItems.map((item) => <li>{item}</li>)}
+          </ul>
+
+          <a class="btn food__cta" href={links.menuPdf} target="_blank" rel="noopener">
+            {ui.home.foodCta}
+          </a>
+        </div>
+
+      <figure class="food__shot">
+        <Picture
+          src={picnicFood}
+          formats={['avif', 'webp']}
+          fallbackFormat="webp"
+          widths={[400, 640, 828, 1080]}
+          sizes="(min-width: 48rem) 46vw, 100vw"
+          quality={62}
+          alt={ui.photos.picnicFood.alt}
+          loading="lazy"
+        />
+        </figure>
+      </div>
+
+      {/* Most of what this business publishes is video, so it belongs on the
+          page. Hosted on R2, click-to-play, zero bytes until tapped. */}
+      <h3 class="videos__h">{ui.home.videosTitle}</h3>
+      <div class="videos">
+        <VideoPlayer
+          name="pasta"
+          poster={posterPasta}
+          title={ui.home.videoPasta}
+          caption={ui.home.videoPasta}
+          label={ui.home.videoPlayLabel}
+        />
+        <VideoPlayer
+          name="hiddengem"
+          poster={posterHiddenGem}
+          title={ui.home.videoHiddenGem}
+          caption={ui.home.eyebrow}
+          label={ui.home.videoPlayLabel}
+        />
+      </div>
+      <p class="videos__note">{ui.home.videosNote}</p>
+
+    </div>
+  </section>
+
+  {/* 5 — Location. The address links straight into Maps, which on a phone
+      opens the Maps app — better than an iframe and about 1MB cheaper. */}
+  <section class="section" id="lokasi">
+    <div class="container">
+      <h2>{ui.home.locationTitle}</h2>
+      <p class="lead">{ui.home.locationLead}</p>
+
+      <div class="loc">
+        <a class="loc__card loc__card--addr" href={nap.mapsUrl} target="_blank" rel="noopener">
+          <span class="loc__label">{ui.home.addressLabel}</span>
+          <span class="loc__addr">{addressLine}</span>
+          <span class="loc__link">{ui.common.openInMaps} →</span>
+        </a>
+
+        <div class="loc__card">
+          <span class="loc__label">{ui.home.hoursLabel}</span>
+          <dl class="loc__hours">
+            {
+              hours.map((h, i) => (
+                <div class="loc__hrow">
+                  <dt>{ui.common.hoursLabels[i]}</dt>
+                  <dd>
+                    {h.open} – {h.close === '24:00' ? '00.00' : h.close}
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* 6 — Gallery */}
+  <section class="section section--alt" id="galeri">
+    <div class="container">
+      <h2>{ui.home.galleryTitle}</h2>
+      <p class="lead">{ui.home.galleryLead}</p>
+      <div class="gal-wrap"><Gallery {photos} {locale} /></div>
+    </div>
+  </section>
+
+  {/* 7 — The café -> wedding story. This is the business's own narrative, and
+      it converts far better than a bare "we also do weddings" panel. */}
+  <section class="section section--green">
+    <div class="container story">
+      <div>
+        <h2>{ui.home.storyTitle}</h2>
+        <p class="story__body">{ui.home.storyBody}</p>
+        <a class="btn btn--on-green story__cta" href={weddingHref} data-astro-prefetch>
+          {ui.home.storyCta}
+        </a>
+      </div>
+      <figure class="story__media">
+        <Picture
+          src={weddingProcession}
+          formats={['avif', 'webp']}
+          fallbackFormat="webp"
+          widths={[400, 640, 828]}
+          sizes="(min-width: 48rem) 45vw, 100vw"
+          quality={60}
+          alt={ui.photos.procession.alt}
+          loading="lazy"
+        />
+      </figure>
+    </div>
+  </section>
+
+  {/* 8 — FAQ. Answered on-page for SEO/GEO (FAQPage schema below) and to cut
+      the repeat questions that otherwise land in WhatsApp. */}
+  <section class="section section--alt" id="faq">
+    <div class="container">
+      <h2>{ui.home.homeFaqTitle}</h2>
+      <div class="faq-wrap"><Faq items={ui.home.homeFaq} /></div>
+    </div>
+  </section>
+
+  {/* 9 — Everything else, demoted so it stops competing with the primary CTA
+      the way the old link-hub did. */}
+  <section class="section">
+    <div class="container">
+      <h2 class="more__h">{ui.home.moreTitle}</h2>
+      <div class="more">
+        <a class="btn more__item" href={links.menuPdf} target="_blank" rel="noopener">
+          {ui.home.menuCta}
+        </a>
+        <a class="btn more__item" href={links.feedbackForm} target="_blank" rel="noopener">
+          {ui.home.reviewCta}
+        </a>
+        <a
+          class="btn more__item"
+          href={`https://wa.me/${wa.badminton}?text=${encodeURIComponent(ui.wa.badminton)}`}
+          target="_blank"
+          rel="noopener"
+          data-wa
+        >
+          {ui.home.badmintonCta}
+        </a>
+        <a class="btn more__item" href={links.careerForm} target="_blank" rel="noopener">
+          {ui.home.careerCta}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <StickyBar
+    number={wa.reservasi}
+    message={ui.wa.reservasi}
+    anchorHref="#lokasi"
+    anchorLabel={ui.home.stickyAnchor}
+    waLabel={ui.nav.reserve}
+  />
+</BaseLayout>
+
+<style>
+  /* ============================================================
+     Hero — headline block, then a full-bleed 16:9 film strip.
+     The video is landscape; boxing it into a side column would shrink
+     the one thing the page is actually about.
+     ============================================================ */
+  .hero {
+    padding-block-start: var(--sp-8);
+  }
+
+  .hero__lead {
+    margin-block-start: var(--sp-4);
+    font-size: var(--fs-lg);
+    color: var(--text-muted);
+    max-width: 40ch;
+  }
+
+  .hero__cta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    margin-block-start: var(--sp-8);
+  }
+
+  .hero__open {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-block-start: var(--sp-6);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--r-full);
+    background: var(--green-500);
+    flex: none;
+  }
+
+  /* Sits inside the container so its edges line up with the header, the nav
+     and every section below. Full-bleed read as overflowing rather than
+     confident once the header was right there for comparison. */
+  .hero__film {
+    width: 100%;
+    max-width: var(--container);
+    margin: var(--sp-8) auto 0;
+    padding-inline: var(--gutter);
+  }
+
+  @media (min-width: 30rem) {
+    .hero__cta {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .hero {
+      padding-block-start: var(--sp-16);
+    }
+
+    /* Keep the container's own width so the hero starts on the same left
+       edge as every other section. Shrinking this element re-centred the
+       whole block and left the headline floating mid-canvas. The measure is
+       constrained on the text itself instead. */
+    .hero h1 {
+      max-width: 17ch;
+    }
+
+    .hero__lead {
+      max-width: 46ch;
+    }
+
+    .hero__film {
+      margin-block-start: var(--sp-12);
+    }
+  }
+
+  /* ============================================================
+     Facts strip
+     ============================================================ */
+  .facts {
+    border-block: 1px solid var(--border);
+    background: var(--bg-alt);
+  }
+
+  .facts__grid {
+    display: grid;
+    gap: var(--sp-4);
+    padding-block: var(--sp-6);
+    /* margin-block only. A blanket `margin: 0` here silently cancelled
+       .container's `margin-inline: auto`, so this row broke out of the grid
+       and sat hard against the left edge while the header stayed centred. */
+    margin-block: 0;
+  }
+
+  .fact dt {
+    font-size: var(--fs-xs);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-caption);
+  }
+
+  .fact dd {
+    margin: var(--sp-1) 0 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+  }
+
+  @media (min-width: 48rem) {
+    .facts__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-8);
+    }
+  }
+
+  /* ============================================================
+     Shared
+     ============================================================ */
+  h2 {
+    margin-block-start: var(--sp-2);
+  }
+
+  .lead {
+    margin-block-start: var(--sp-4);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+
+  .gal-wrap {
+    margin-block-start: var(--sp-8);
+  }
+
+  /* ============================================================
+     Intent router
+     ============================================================ */
+  .uses {
+    display: grid;
+    gap: var(--sp-6);
+    margin-block-start: var(--sp-8);
+  }
+
+  .use {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  /* Natural ratio, no forced crop. All four sources are pre-cropped to the same
+     4:5 ratio at the asset level (the odd 0.85 wedding shot was trimmed to
+     match), so they render the same height on their own. Forcing aspect-ratio +
+     object-fit here made the grid size the row to each image's full pixel
+     height (~1350px), stretching a thin, towering slice. */
+  .use :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--neutral-100);
+  }
+
+  .use__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-6);
+    flex: 1;
+  }
+
+  .use__body p {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    flex: 1;
+  }
+
+  .use__cta {
+    align-self: flex-start;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--fs-sm);
+    color: var(--green-600);
+    text-decoration: none;
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+
+  /* One column on phones on purpose: a single card fills the view so the reader
+     takes the four reasons one at a time instead of scanning a cramped 2-up. */
+  @media (min-width: 48rem) {
+    .uses {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .uses {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* ============================================================
+     Kitchen
+     ============================================================ */
+  .food__title {
+    max-width: 20ch;
+    margin-block-start: var(--sp-2);
+  }
+
+  .food__list {
+    display: grid;
+    gap: var(--sp-2);
+    margin-block-start: var(--sp-6);
+    padding: 0;
+    list-style: none;
+    max-width: 32rem;
+  }
+
+  .food__list li {
+    position: relative;
+    padding: var(--sp-3) 0 var(--sp-3) var(--sp-6);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+  }
+
+  /* Yellow hairline motif as the marker. No icon set. */
+  .food__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.45em;
+    width: 14px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .food__shot {
+    margin: var(--sp-8) 0 0;
+  }
+
+  .food__shot :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: var(--r-md);
+    background: var(--neutral-100);
+  }
+
+  @media (min-width: 48rem) {
+    /* Copy and photograph share the row; the list stays on a readable
+       measure instead of stretching across the full container. */
+    .food__grid {
+      display: grid;
+      /* Photo column is the narrower one: a 4:5 image at half width stood
+         far taller than the copy beside it and left a dead gap. */
+      grid-template-columns: 1fr 0.8fr;
+      gap: var(--sp-12);
+      align-items: center;
+    }
+
+    .food__shot {
+      margin-block-start: 0;
+    }
+  }
+
+  .food__cta {
+    margin-block-start: var(--sp-8);
+    width: 100%;
+  }
+
+  @media (min-width: 30rem) {
+    .food__cta {
+      width: auto;
+    }
+  }
+
+  /* ---- Videos ------------------------------------------------ */
+  .videos__h {
+    margin-block-start: var(--sp-16);
+    font-size: var(--fs-h3);
+  }
+
+  .videos {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 88%;
+    gap: var(--sp-4);
+    margin-block-start: var(--sp-6);
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .videos::-webkit-scrollbar {
+    display: none;
+  }
+
+  .videos > :global(*) {
+    scroll-snap-align: start;
+  }
+
+  .videos__note {
+    margin-block-start: var(--sp-4);
+    font-size: var(--fs-xs);
+    color: var(--text-caption);
+  }
+
+  @media (min-width: 48rem) {
+    .videos {
+      grid-auto-flow: row;
+      /* auto-fit, not a fixed 3, so the row stays full whatever the count.
+         Hard-coding 3 left a gap the moment one video was dropped. */
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+      overflow: visible;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+  }
+
+  /* ============================================================
+     Location
+     ============================================================ */
+  .loc {
+    display: grid;
+    gap: var(--sp-4);
+    margin-block-start: var(--sp-8);
+  }
+
+  .loc__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding: var(--sp-6);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    text-decoration: none;
+  }
+
+  .loc__label {
+    font-size: var(--fs-xs);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-caption);
+  }
+
+  .loc__addr {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    line-height: var(--lh-snug);
+  }
+
+  .loc__link {
+    margin-block-start: var(--sp-2);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--green-600);
+  }
+
+  .loc__card--addr:hover .loc__link {
+    text-decoration: underline;
+  }
+
+  .loc__hours {
+    display: grid;
+    gap: var(--sp-2);
+    margin: 0;
+  }
+
+  .loc__hrow {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding-block: var(--sp-2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .loc__hrow:last-child {
+    border-bottom: 0;
+  }
+
+  .loc__hrow dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 48rem) {
+    .loc {
+      grid-template-columns: 1.2fr 1fr;
+    }
+  }
+
+  /* ============================================================
+     Wedding story
+     ============================================================ */
+  .story {
+    display: grid;
+    gap: var(--sp-8);
+  }
+
+  .story h2 {
+    max-width: 22ch;
+  }
+
+  .story__body {
+    margin-block-start: var(--sp-4);
+    color: var(--green-200);
+    max-width: 48ch;
+  }
+
+  .story__cta {
+    margin-block-start: var(--sp-6);
+  }
+
+  .story__media :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: var(--r-lg);
+  }
+
+  @media (min-width: 48rem) {
+    .story {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-12);
+      align-items: center;
+    }
+  }
+
+  /* ============================================================
+     FAQ
+     ============================================================ */
+  .faq-wrap {
+    margin-block-start: var(--sp-8);
+  }
+
+  /* Desktop: heading beside the questions so the list fills its column instead
+     of stranding an empty right half. */
+  @media (min-width: 64rem) {
+    #faq :global(.container) {
+      display: grid;
+      grid-template-columns: 1fr 1.7fr;
+      gap: var(--sp-16);
+      align-items: start;
+    }
+
+    #faq :global(.container) > h2 {
+      margin-block-start: 0;
+    }
+
+    #faq .faq-wrap {
+      margin-block-start: 0;
+    }
+  }
+
+  /* ============================================================
+     More links
+     ============================================================ */
+  .more__h {
+    font-size: var(--fs-h3);
+  }
+
+  .more {
+    display: grid;
+    gap: var(--sp-2);
+    margin-block-start: var(--sp-6);
+  }
+
+  /* Solid green so these read unmistakably as buttons. As plain bordered
+     cards they were being mistaken for static panels. */
+  :global(a.more__item) {
+    justify-content: flex-start;
+    min-height: 52px;
+    text-align: left;
+    border-radius: var(--r-md);
+  }
+
+  /* Two columns from tablet up, one on phones — so each link is a full-width
+     tap target on mobile and a tidy 2-up on desktop. */
+  @media (min-width: 48rem) {
+    .more {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

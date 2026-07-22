@@ -1,0 +1,212 @@
+---
+import { addressLine, hours, links, nap, site, wa } from '../data/site';
+import { localizedPath, type Locale } from '../i18n/config';
+import { t } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const ui = t(locale);
+const year = new Date().getFullYear();
+---
+
+<footer class="ftr">
+  <div class="container ftr__grid">
+    <div class="ftr__col">
+      <img
+        class="ftr__brand"
+        src="/brand/logo-white.webp"
+        srcset="/brand/logo-white.webp 1x, /brand/logo-white@2x.webp 2x"
+        width="320"
+        height="282"
+        alt="150 Coffee Garden"
+        loading="lazy"
+      />
+      <p class="ftr__addr">
+        {addressLine}
+      </p>
+      <a class="ftr__link" href={nap.mapsUrl} target="_blank" rel="noopener">
+        {ui.common.openInMaps}
+      </a>
+    </div>
+
+    <div class="ftr__col">
+      <h2 class="ftr__h">{ui.common.openingHours}</h2>
+      <dl class="ftr__hours">
+        {
+          hours.map((h, i) => (
+            <div class="ftr__hrow">
+              <dt>{ui.common.hoursLabels[i]}</dt>
+              <dd>
+                {h.open} – {h.close === '24:00' ? '00:00' : h.close}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div class="ftr__col">
+      <h2 class="ftr__h">{ui.common.contact}</h2>
+      <ul class="ftr__list">
+        <li>
+          <a class="ftr__link" href={`https://wa.me/${wa.reservasi}`} target="_blank" rel="noopener">
+            {`${ui.common.whatsapp} · ${ui.nav.reserve}`}
+          </a>
+        </li>
+        <li>
+          <a
+            class="ftr__link"
+            href={`https://wa.me/${wa.wedding}?text=${encodeURIComponent(ui.wa.weddingUmum)}`}
+            target="_blank"
+            rel="noopener"
+          >
+            {`${ui.common.whatsapp} · Wedding`}
+          </a>
+        </li>
+        <li>
+          <a
+            class="ftr__link"
+            href={`https://wa.me/${wa.badminton}?text=${encodeURIComponent(ui.wa.badminton)}`}
+            target="_blank"
+            rel="noopener"
+          >
+            150 Badminton
+          </a>
+        </li>
+        <li>
+          <a class="ftr__link" href={links.careerForm} target="_blank" rel="noopener">
+            150 Career Center
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="ftr__col">
+      <h2 class="ftr__h">{ui.common.follow}</h2>
+      <ul class="ftr__list">
+        <li>
+          <a class="ftr__link" href={links.instagram} target="_blank" rel="noopener">Instagram</a>
+        </li>
+        <li>
+          <a class="ftr__link" href={links.facebook} target="_blank" rel="noopener">Facebook</a>
+        </li>
+        <li>
+          <a class="ftr__link" href={links.googleReview} target="_blank" rel="noopener">
+            {ui.common.reviewOnGoogle}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container ftr__base">
+    <p>&copy; {year} {site.legalName}</p>
+    <p class="ftr__legal">
+      <a class="ftr__link" href={localizedPath('/privacypolicy/', locale)}>{ui.common.privacy}</a>
+      <a class="ftr__link" href={localizedPath('/termsofservice/', locale)}>{ui.common.terms}</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .ftr {
+    background: var(--green-900);
+    color: var(--white);
+    padding-block: var(--sp-16) var(--sp-8);
+    margin-block-start: var(--section-y);
+  }
+
+  .ftr__grid {
+    display: grid;
+    gap: var(--sp-8);
+  }
+
+  .ftr__brand {
+    height: 4rem;
+    width: auto;
+  }
+
+  .ftr__addr {
+    margin-block-start: var(--sp-3);
+    color: var(--green-200);
+    font-size: var(--fs-sm);
+    max-width: 28ch;
+  }
+
+  .ftr__h {
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--green-200);
+    margin-block-end: var(--sp-4);
+  }
+
+  .ftr__hours,
+  .ftr__list {
+    display: grid;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ftr__hrow {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    max-width: 22rem;
+  }
+
+  .ftr__hrow dd {
+    margin: 0;
+    color: var(--green-200);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ftr__link {
+    color: var(--white);
+    text-decoration: none;
+    border-bottom: 1px solid rgb(255 255 255 / 0.18);
+    padding-block-end: 1px;
+    transition: border-color var(--dur) var(--ease);
+  }
+
+  .ftr__link:hover {
+    border-color: var(--accent);
+  }
+
+  .ftr__base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-block-start: var(--sp-16);
+    padding-block-start: var(--sp-6);
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+    font-size: var(--fs-xs);
+    color: var(--green-200);
+  }
+
+  .ftr__legal {
+    display: flex;
+    gap: var(--sp-6);
+  }
+
+  @media (min-width: 48rem) {
+    .ftr__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--sp-12) var(--sp-8);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .ftr__grid {
+      grid-template-columns: 1.4fr 1fr 1fr 0.8fr;
+    }
+  }
+</style>

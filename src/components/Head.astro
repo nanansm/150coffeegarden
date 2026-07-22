@@ -1,0 +1,66 @@
+---
+import { site } from '../data/site';
+import { LOCALES, LOCALE_META, localizedPath, type Locale } from '../i18n/config';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Locale-agnostic route key, e.g. "/wedding/". Prefixes are added here. */
+  route: string;
+  locale: Locale;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const { title, description, route, locale, ogImage = '/og/home.jpg', noindex = false } = Astro.props;
+
+const canonicalUrl = new URL(localizedPath(route, locale), site.url).href;
+const ogImageUrl = new URL(ogImage, site.url).href;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+{noindex && <meta name="robots" content="noindex,follow" />}
+
+{/* hreflang: every locale points at every other, plus x-default on English. */}
+{
+  LOCALES.map((loc) => (
+    <link
+      rel="alternate"
+      hreflang={LOCALE_META[loc].htmlLang}
+      href={new URL(localizedPath(route, loc), site.url).href}
+    />
+  ))
+}
+<link rel="alternate" hreflang="x-default" href={new URL(localizedPath(route, 'en'), site.url).href} />
+
+<meta name="theme-color" content={site.themeColor} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:locale" content={LOCALE_META[locale].ogLocale} />
+{
+  LOCALES.filter((l) => l !== locale).map((l) => (
+    <meta property="og:locale:alternate" content={LOCALE_META[l].ogLocale} />
+  ))
+}
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:image" content={ogImageUrl} />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="/favicon.ico" sizes="48x48" />
+<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+<link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+{/* Preload exactly two faces. Preloading more competes with the LCP image
+    for bandwidth on 4G, which costs more than it saves. */}
+<link rel="preload" href="/fonts/general-sans-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
+
+<slot />

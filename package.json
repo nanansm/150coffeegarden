@@ -1,0 +1,21 @@
+{
+  "name": "150coffeegarden",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro build && wrangler pages dev dist",
+    "check": "astro check",
+    "sizes": "find dist -name '*.html' -exec sh -c 'printf \"%8s  %s\\n\" $(gzip -c \"$1\" | wc -c) \"$1\"' _ {} \\;"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.0",
+    "astro": "^5.17.0",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "wrangler": "^4.112.0"
+  }
+}

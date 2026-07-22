@@ -1,2 +1,13 @@
-
 .DS_Store
+node_modules/
+dist/
+.astro/
+.wrangler/
+*.log
+
+# Playwright / scratch screenshots (root-level only; real assets live in
+# public/ and src/assets/, never at the repo root)
+.playwright-mcp/
+/*.jpeg
+/*.jpg
+/*.png

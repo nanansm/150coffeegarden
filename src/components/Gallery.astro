@@ -1,0 +1,267 @@
+---
+/**
+ * Photo gallery + native <dialog> lightbox.
+ *
+ * Mixed aspect ratios on purpose — a uniform grid of identical crops is the
+ * template tell. Captions are editorial: real places have captions.
+ *
+ * The lightbox opens the ~1200px variant, not the original, and only sets
+ * src on open, so visitors who never tap a photo never download the large
+ * files. <dialog> supplies focus trap, Esc, and focus restore for free.
+ */
+import { Picture, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import type { Locale } from '../i18n/config';
+import { t } from '../i18n/ui';
+
+export interface GalleryPhoto {
+  src: ImageMetadata;
+  alt: string;
+  caption: string;
+  /** Tall items span two rows on wide screens. */
+  tall?: boolean;
+}
+
+interface Props {
+  photos: GalleryPhoto[];
+  locale: Locale;
+}
+
+const { photos, locale } = Astro.props;
+const ui = t(locale);
+
+// Build a real ~1200px variant per photo. Serialising `photo.src.src` shipped
+// the untouched repo original — multi-megabyte JPEGs pulled over mobile data
+// the moment someone tapped a thumbnail.
+const lightboxSources = await Promise.all(
+  photos.map(async (photo) => {
+    const img = await getImage({
+      src: photo.src,
+      width: Math.min(1200, photo.src.width),
+      format: 'webp',
+      quality: 70,
+    });
+    return { src: img.src, alt: photo.alt, caption: photo.caption };
+  }),
+);
+---
+
+<div class="gal">
+  {
+    photos.map((photo, i) => (
+      <figure class:list={['gal__fig', photo.tall && 'gal__fig--tall']}>
+        <button
+          type="button"
+          class="gal__btn"
+          data-lightbox
+          data-index={i}
+          aria-label={ui.gallery.zoom(photo.alt)}
+        >
+          <Picture
+            src={photo.src}
+            formats={['avif', 'webp']}
+          fallbackFormat="webp"
+            widths={[400, 640, 828, 1200]}
+            sizes="(min-width: 64rem) 33vw, (min-width: 30rem) 50vw, 100vw"
+            quality={68}
+            alt={photo.alt}
+            loading="lazy"
+            decoding="async"
+          />
+        </button>
+      </figure>
+    ))
+  }
+</div>
+
+{/* Full-size sources, resolved at build time and read by the lightbox script. */}
+<script
+  type="application/json"
+  id="gallery-data"
+  set:html={JSON.stringify(lightboxSources)}
+/>
+
+<dialog id="lightbox" class="lb" aria-label={ui.gallery.preview}>
+  <button type="button" class="lb__close" aria-label={ui.gallery.close} data-lb-close>
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+      ></path>
+    </svg>
+  </button>
+  <figure class="lb__fig">
+    <img class="lb__img" alt="" />
+    <figcaption class="lb__cap"></figcaption>
+  </figure>
+  <button type="button" class="lb__nav lb__nav--prev" aria-label={ui.gallery.prev} data-lb-prev
+    >‹</button
+  >
+  <button type="button" class="lb__nav lb__nav--next" aria-label={ui.gallery.next} data-lb-next
+    >›</button
+  >
+</dialog>
+
+<style>
+  .gal {
+    display: grid;
+    gap: var(--sp-4);
+  }
+
+  .gal__btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    background: var(--neutral-100);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+
+  .gal__btn :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 4 / 5;
+    transition: scale var(--dur-slow) var(--ease);
+  }
+
+  .gal__btn:hover :global(img) {
+    scale: 1.02;
+  }
+
+  /* 1 column below 480px — the legacy grid forced a cramped 2-column
+     layout on phones via minmax(200px, 1fr). */
+  @media (min-width: 30rem) {
+    .gal {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .gal {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-6);
+    }
+
+    .gal__fig--tall .gal__btn :global(img) {
+      aspect-ratio: 3 / 4;
+    }
+  }
+
+  /* --- Lightbox --- */
+  .lb {
+    width: min(92vw, 1100px);
+    max-width: none;
+    max-height: 92dvh;
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-lg);
+    background: var(--white);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+
+  .lb::backdrop {
+    background: rgb(10 43 30 / 0.72);
+    backdrop-filter: blur(2px);
+  }
+
+  .lb__fig {
+    margin: 0;
+  }
+
+  .lb__img {
+    width: 100%;
+    max-height: 78dvh;
+    object-fit: contain;
+    background: var(--neutral-100);
+  }
+
+  .lb__cap {
+    padding: var(--sp-3) var(--sp-6) var(--sp-4);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+
+  .lb__close,
+  .lb__nav {
+    position: absolute;
+    display: grid;
+    place-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--white);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-full);
+    color: var(--green-600);
+    cursor: pointer;
+  }
+
+  .lb__close {
+    top: var(--sp-3);
+    right: var(--sp-3);
+  }
+
+  .lb__nav {
+    top: 50%;
+    translate: 0 -50%;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .lb__nav--prev {
+    left: var(--sp-3);
+  }
+
+  .lb__nav--next {
+    right: var(--sp-3);
+  }
+</style>
+
+<script>
+  interface Photo {
+    src: string;
+    alt: string;
+    caption: string;
+  }
+
+  const dataEl = document.getElementById('gallery-data');
+  const lb = document.getElementById('lightbox') as HTMLDialogElement | null;
+
+  if (dataEl?.textContent && lb) {
+    const photos: Photo[] = JSON.parse(dataEl.textContent);
+    const img = lb.querySelector<HTMLImageElement>('.lb__img')!;
+    const cap = lb.querySelector<HTMLElement>('.lb__cap')!;
+    let index = 0;
+
+    const show = (i: number) => {
+      index = (i + photos.length) % photos.length;
+      const photo = photos[index];
+      // src is only assigned on open, so large files are never fetched by
+      // visitors who do not interact with the gallery.
+      img.src = photo.src;
+      img.alt = photo.alt;
+      cap.textContent = photo.caption;
+    };
+
+    document.querySelectorAll<HTMLButtonElement>('[data-lightbox]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        show(Number(btn.dataset.index));
+        lb.showModal();
+      });
+    });
+
+    lb.querySelector('[data-lb-close]')?.addEventListener('click', () => lb.close());
+    lb.querySelector('[data-lb-prev]')?.addEventListener('click', () => show(index - 1));
+    lb.querySelector('[data-lb-next]')?.addEventListener('click', () => show(index + 1));
+
+    lb.addEventListener('click', (e) => {
+      if (e.target === lb) lb.close();
+    });
+
+    lb.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(index - 1);
+      if (e.key === 'ArrowRight') show(index + 1);
+    });
+  }
+</script>

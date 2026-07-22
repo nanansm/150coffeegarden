@@ -1,0 +1,64 @@
+---
+import Head from '../components/Head.astro';
+import Header from '../components/Header.astro';
+import Drawer from '../components/Drawer.astro';
+import Footer from '../components/Footer.astro';
+import { LOCALE_META, type Locale } from '../i18n/config';
+import { t } from '../i18n/ui';
+
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Locale-agnostic route key, e.g. "/wedding/". */
+  route: string;
+  locale: Locale;
+  ogImage?: string;
+  noindex?: boolean;
+  /** Extra Meta Pixel event fired on this page, e.g. the wedding page. */
+  pixelEvent?: 'ViewContent';
+}
+
+const { title, description, route, locale, ogImage, noindex, pixelEvent } = Astro.props;
+const ui = t(locale);
+---
+
+<!doctype html>
+<html lang={LOCALE_META[locale].htmlLang}>
+  <head>
+    <Head {title} {description} {route} {locale} {ogImage} {noindex}>
+      <slot name="head" />
+    </Head>
+  </head>
+  <body data-pixel-event={pixelEvent}>
+    <a class="skip-link" href="#main">{ui.nav.skip}</a>
+    <Header {locale} {route} />
+    <Drawer {locale} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer {locale} />
+
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style="display:none"
+        src="https://www.facebook.com/tr?id=1019637798400517&ev=PageView&noscript=1"
+        alt=""
+      />
+    </noscript>
+
+    <script>
+      // The Pixel itself is deferred to idle/first-interaction inside
+      // initPixel — see src/scripts/pixel.ts.
+      import { initPixel } from '../scripts/pixel';
+
+      const event = document.body.dataset.pixelEvent;
+      initPixel(event === 'ViewContent' ? 'ViewContent' : undefined);
+    </script>
+  </body>
+</html>
