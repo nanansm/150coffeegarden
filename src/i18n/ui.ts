@@ -31,7 +31,7 @@ export const ui = {
   en: {
     nav: {
       home: 'Home',
-      wedding: 'Wedding & Events',
+      wedding: 'Wedding and Events',
       feedback: 'Give Us Your Feedback',
       menu: 'Menu',
       location: 'Location',
@@ -52,7 +52,7 @@ export const ui = {
       follow: 'Follow',
       privacy: 'Privacy Policy',
       terms: 'Terms of Service',
-      brandTagline: 'Outdoor garden café & venue · Cicaheum, Bandung',
+      brandTagline: 'Outdoor garden café and venue · Cicaheum, Bandung',
       reviewOnGoogle: 'Review us on Google',
       hoursLabels: ['Sunday – Thursday', 'Friday – Saturday'],
     },
@@ -75,15 +75,15 @@ export const ui = {
 
       doTitle: 'Come for one thing, stay for another',
       doLead: 'Four quite different reasons people end up here.',
-      doCafe: 'Coffee & working',
+      doCafe: 'Coffee and working',
       doCafeBody:
         'Wooden pavilions with long tables and deep shade. People settle in from opening and lose the morning here.',
       doCafeCta: 'See the menu',
-      doGather: 'Family & picnics',
+      doGather: 'Family and picnics',
       doGatherBody:
         'Mats on the grass, space for kids to run, and a kids menu. Sundays fill up with whole families.',
       doGatherCta: 'Ask about a booking',
-      doEvent: 'Gatherings & events',
+      doEvent: 'Gatherings and events',
       doEventBody:
         'Community meetups, campus events, office gatherings and small exhibitions have all run on this lawn.',
       doEventCta: 'Ask about the venue',
@@ -166,7 +166,7 @@ export const ui = {
       h1: 'Get married in a garden, not a ballroom.',
       lead: 'Cool, green grounds with tall trees and a pond in Cicaheum, East Bandung. Right for the ceremony, the reception, or something intimate. See which dates are still open, then lock yours over WhatsApp.',
       priceBadge: 'From IDR 17 million',
-      heroChips: ['Outdoor garden', 'Ceremony & reception', 'Up to ~1,000 guests'],
+      heroChips: ['Outdoor garden', 'Ceremony and reception', 'Up to ~1,000 guests'],
       ctaCheckDate: 'Check Dates',
       ctaChat: 'Ask the Wedding Admin',
 
@@ -205,7 +205,7 @@ export const ui = {
         'Family get-togethers',
         'Birthdays',
         'Community meetups',
-        'Exhibitions & small markets',
+        'Exhibitions and small markets',
       ],
 
       faqTitle: 'Questions we get often',
@@ -358,7 +358,7 @@ export const ui = {
       {
         name: 'Custom',
         priceLabel: 'On request',
-        includes: ['Bespoke concept & requirements', 'Vendor collaboration', 'Flexible setup'],
+        includes: ['Bespoke concept and requirements', 'Vendor collaboration', 'Flexible setup'],
       },
     ] as PackageItem[],
     /**
@@ -382,7 +382,7 @@ export const ui = {
   id: {
     nav: {
       home: 'Beranda',
-      wedding: 'Wedding & Acara',
+      wedding: 'Wedding dan Acara',
       feedback: 'Beri Masukan',
       menu: 'Menu',
       location: 'Lokasi',
@@ -403,7 +403,7 @@ export const ui = {
       follow: 'Ikuti',
       privacy: 'Kebijakan Privasi',
       terms: 'Syarat Layanan',
-      brandTagline: 'Kafe taman terbuka & tempat acara · Cicaheum, Bandung',
+      brandTagline: 'Kafe taman terbuka dan tempat acara · Cicaheum, Bandung',
       reviewOnGoogle: 'Ulas kami di Google',
       hoursLabels: ['Minggu – Kamis', 'Jumat – Sabtu'],
     },
@@ -426,15 +426,15 @@ export const ui = {
 
       doTitle: 'Datang buat satu hal, betah karena hal lain',
       doLead: 'Empat alasan yang beda-beda kenapa orang berakhir di sini.',
-      doCafe: 'Ngopi & kerja',
+      doCafe: 'Ngopi dan kerja',
       doCafeBody:
         'Saung kayu, meja panjang, dan teduh yang tebal. Banyak yang datang pas buka lalu kehabisan pagi di sini.',
       doCafeCta: 'Lihat menu',
-      doGather: 'Keluarga & piknik',
+      doGather: 'Keluarga dan piknik',
       doGatherBody:
         'Tikar digelar di rumput, anak-anak bebas lari, dan ada menu khusus anak. Hari Minggu penuh sama keluarga.',
       doGatherCta: 'Tanya reservasi',
-      doEvent: 'Gathering & acara',
+      doEvent: 'Gathering dan acara',
       doEventBody:
         'Kumpul komunitas, acara kampus, gathering kantor, sampai exhibition kecil pernah jalan di halaman ini.',
       doEventCta: 'Tanya sewa tempat',
@@ -517,7 +517,7 @@ export const ui = {
       h1: 'Nikah di taman, bukan di dalam gedung.',
       lead: 'Taman hijau yang adem dengan pohon-pohon tinggi dan kolam di Cicaheum, Bandung Timur. Cocok buat akad, resepsi, atau intimate wedding. Cek tanggal yang masih kosong di kalender, lalu kunci lewat WhatsApp.',
       priceBadge: 'Mulai 17 juta',
-      heroChips: ['Outdoor garden', 'Akad & resepsi', 'Sampai ±1.000 tamu'],
+      heroChips: ['Outdoor garden', 'Akad dan resepsi', 'Sampai ±1.000 tamu'],
       ctaCheckDate: 'Cek Tanggal',
       ctaChat: 'Tanya Admin Wedding',
 
@@ -552,11 +552,11 @@ export const ui = {
         'Area yang sama dipakai untuk gathering kantor, arisan, ulang tahun, pertemuan komunitas, sampai exhibition kecil. Untuk acara non-pernikahan, admin yang menangani berbeda.',
       eventCta: 'Tanya sewa tempat untuk acara',
       eventUses: [
-        'Gathering & acara kantor',
-        'Arisan & kumpul keluarga',
+        'Gathering dan acara kantor',
+        'Arisan dan kumpul keluarga',
         'Ulang tahun',
         'Pertemuan komunitas',
-        'Exhibition & bazaar kecil',
+        'Exhibition dan bazaar kecil',
       ],
 
       faqTitle: 'Pertanyaan yang sering masuk',
@@ -709,7 +709,7 @@ export const ui = {
       {
         name: 'Custom',
         priceLabel: 'Sesuai permintaan',
-        includes: ['Konsep & kebutuhan khusus', 'Kolaborasi dengan vendor', 'Setup fleksibel'],
+        includes: ['Konsep dan kebutuhan khusus', 'Kolaborasi dengan vendor', 'Setup fleksibel'],
       },
     ] as PackageItem[],
     wa: {

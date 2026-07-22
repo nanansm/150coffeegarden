@@ -51,7 +51,7 @@ const src = `${CDN}/video/${name}.mp4`;
       src={poster}
       formats={['avif', 'webp']}
       fallbackFormat="webp"
-      widths={wide ? [640, 960, 1280, 1600] : portrait ? [360, 540, 720] : [400, 640, 854]}
+      widths={wide ? [640, 1024, 1600] : portrait ? [360, 540, 720] : [400, 640, 854]}
       sizes={wide
         ? '100vw'
         : portrait

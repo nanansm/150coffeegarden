@@ -85,8 +85,8 @@
 
   /* The *-Fallback families are metric-matched (see fonts.css) so the
      font-display: swap handoff causes near-zero layout shift. */
-  --font-display: 'Space Grotesk', 'Space Grotesk Fallback', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'General Sans', 'General Sans Fallback', ui-sans-serif, system-ui, -apple-system,
+  --font-display: 'Grotley', 'Grotley Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'DM Sans', 'DM Sans Fallback', ui-sans-serif, system-ui, -apple-system,
     sans-serif;
 
   /* --- Spacing --------------------------------------------- */

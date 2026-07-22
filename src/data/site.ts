@@ -7,7 +7,7 @@
 
 export const site = {
   name: '150 Coffee Garden',
-  legalName: '150 Coffee & Garden',
+  legalName: '150 Coffee Garden',
   url: 'https://150coffeegarden.com',
   locale: 'id_ID',
   lang: 'id',
@@ -85,7 +85,7 @@ export const META_PIXEL_ID = '1019637798400517';
 
 export const nav = [
   { label: 'Beranda', href: '/' },
-  { label: 'Wedding & Event', href: '/wedding/', prefetch: true },
+  { label: 'Wedding and Event', href: '/wedding/', prefetch: true },
   { label: 'Menu', href: links.menuPdf, external: true },
   { label: 'Lokasi', href: '/#lokasi' },
 ] as const;
