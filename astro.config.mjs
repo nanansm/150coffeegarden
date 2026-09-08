@@ -46,6 +46,10 @@ export default defineConfig({
         defaultLocale: 'en',
         locales: { en: 'en', id: 'id-ID' },
       },
+      // /e/* holds one-off landings for printed QR codes. They carry
+      // <meta name="robots" content="noindex">, so listing them here would
+      // invite crawlers to a page that then turns them away.
+      filter: (page) => !new URL(page).pathname.startsWith('/e/'),
       serialize(item) {
         if (/\/(id\/)?$/.test(new URL(item.url).pathname)) {
           item.priority = 1.0;

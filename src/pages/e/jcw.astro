@@ -1,0 +1,536 @@
+---
+/**
+ * Jakarta Coffee Week digital invitation.
+ *
+ * Standalone page — no site nav/header/footer, single job. English only,
+ * not part of the id/en routing scheme. Default markup shows the invitation
+ * form (screen 1); the event-details screen (screen 4) is present but
+ * hidden. A <noscript><style> override flips that for JS-less visits, so
+ * the page still makes sense without any script running.
+ */
+import '../../styles/fonts.css';
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import { jcwEvent } from '../../data/jcw';
+
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+function formatDateRange(start: string, end: string): string {
+  const [sy, sm, sd] = start.split('-').map(Number);
+  const [ey, em, ed] = end.split('-').map(Number);
+  if (sy === ey && sm === em) return `${MONTHS[sm - 1]} ${sd}–${ed}, ${sy}`;
+  if (sy === ey) return `${MONTHS[sm - 1]} ${sd} – ${MONTHS[em - 1]} ${ed}, ${sy}`;
+  return `${MONTHS[sm - 1]} ${sd}, ${sy} – ${MONTHS[em - 1]} ${ed}, ${ey}`;
+}
+
+const dateRange = formatDateRange(jcwEvent.startDate, jcwEvent.endDate);
+const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>You are invited — 150 Coffee Garden</title>
+    <noscript>
+      <style>
+        #screen-1 {
+          display: none;
+        }
+        #screen-4 {
+          display: block;
+        }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <div class="page">
+      <div class="wrap">
+        <section id="screen-1" class="screen">
+          <p class="kicker">150 COFFEE GARDEN</p>
+          <h1 class="title">You are invited.</h1>
+          <p class="lead">We're bringing the garden to Jakarta Coffee Week.</p>
+          <hr class="rule" />
+          <form id="invite-form" novalidate>
+            <div class="field">
+              <label for="guest-name">Your name</label>
+              <input id="guest-name" name="name" type="text" placeholder="Type it here" autocomplete="name" />
+            </div>
+            <p id="form-error" class="error" role="alert" hidden></p>
+            <button type="submit" class="btn">Open my invitation</button>
+          </form>
+          <p class="hint">Turn your sound on.</p>
+        </section>
+
+        <section id="screen-2" class="screen" hidden>
+          <p id="hello-line" class="hello"></p>
+          <div id="wait" class="wait" role="status" aria-label="Preparing your greeting">
+            <span></span>
+          </div>
+        </section>
+
+        <section id="screen-3" class="screen" hidden>
+          <p class="lead">We'll drop it in your calendar.</p>
+          <!-- The .ics href is the no-JS floor: every phone calendar opens
+               one. With JS, `calendarTarget()` swaps in the Google link for
+               non-Apple devices before the guest ever sees this screen. -->
+          <a id="continue-btn" class="btn" href="/e/jcw.ics">Continue</a>
+        </section>
+
+        <section id="screen-4" class="screen" hidden>
+          <h1 class="title">See you there.</h1>
+          <dl class="details">
+            <div>
+              <dt>Event</dt>
+              <dd>{jcwEvent.title}</dd>
+            </div>
+            <div>
+              <dt>Date</dt>
+              <dd>{dateRange}</dd>
+            </div>
+            <div>
+              <dt>Doors</dt>
+              <dd>{hours}</dd>
+            </div>
+            <div>
+              <dt>Venue</dt>
+              <dd>{jcwEvent.location}</dd>
+            </div>
+            {
+              jcwEvent.venueDetail && (
+                <div>
+                  <dt>Find us</dt>
+                  <dd>{jcwEvent.venueDetail}</dd>
+                </div>
+              )
+            }
+          </dl>
+          <a id="calendar-link" class="btn" href="/e/jcw.ics">Continue</a>
+          <p class="foot">Your name is used only for this greeting.</p>
+        </section>
+
+        <div class="logo">
+          <img src="/brand/logo-green.webp" srcset="/brand/logo-green.webp 1x, /brand/logo-green@2x.webp 2x" alt="150 Coffee Garden" />
+        </div>
+      </div>
+    </div>
+
+    <script>
+      import { googleCalendarUrl } from '../../data/jcw';
+
+      const nameInput = document.getElementById('guest-name') as HTMLInputElement;
+      const form = document.getElementById('invite-form') as HTMLFormElement;
+      const errorEl = document.getElementById('form-error') as HTMLParagraphElement;
+      const screen1 = document.getElementById('screen-1') as HTMLElement;
+      const screen2 = document.getElementById('screen-2') as HTMLElement;
+      const screen3 = document.getElementById('screen-3') as HTMLElement;
+      const screen4 = document.getElementById('screen-4') as HTMLElement;
+      const helloLine = document.getElementById('hello-line') as HTMLElement;
+      const waitEl = document.getElementById('wait') as HTMLElement;
+      const continueBtn = document.getElementById('continue-btn') as HTMLAnchorElement;
+      const calendarLink = document.getElementById('calendar-link') as HTMLAnchorElement;
+
+      const NAME_PATTERN = /^[A-Za-z' .-]{2,30}$/;
+
+      type PrefetchResult = { url: string } | { error: 'invalid_name' | 'rate_limited' | 'tts_failed' };
+
+      let prefetchPromise: Promise<PrefetchResult> | null = null;
+      let prefetchedName = '';
+      let audioEl: HTMLAudioElement | null = null;
+
+      function isValidName(value: string): boolean {
+        if (!NAME_PATTERN.test(value)) return false;
+        return value.split(/\s+/).length <= 2;
+      }
+
+      function showError(message: string) {
+        errorEl.textContent = message;
+        errorEl.hidden = false;
+      }
+
+      function clearError() {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+      }
+
+      function prefetchVoice(name: string) {
+        prefetchedName = name;
+        prefetchPromise = fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name }),
+        })
+          .then(async (res) => {
+            if (res.status === 429) return { error: 'rate_limited' } as const;
+            if (res.status === 400) return { error: 'invalid_name' } as const;
+            if (!res.ok) return { error: 'tts_failed' } as const;
+            const data = await res.json();
+            return { url: data.url as string };
+          })
+          .catch(() => ({ error: 'tts_failed' }) as const);
+      }
+
+      function handleNameCommit() {
+        const value = nameInput.value.trim();
+        if (!isValidName(value)) return;
+        if (value === prefetchedName && prefetchPromise) return;
+        prefetchVoice(value);
+      }
+
+      nameInput.addEventListener('blur', handleNameCommit);
+      nameInput.addEventListener('change', handleNameCommit);
+
+      function createSilentWavDataUri(): string {
+        const sampleRate = 8000;
+        const numSamples = Math.round(sampleRate * 0.1);
+        const buffer = new ArrayBuffer(44 + numSamples);
+        const view = new DataView(buffer);
+        const writeString = (offset: number, str: string) => {
+          for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+        };
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + numSamples, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate, true);
+        view.setUint16(32, 1, true);
+        view.setUint16(34, 8, true);
+        writeString(36, 'data');
+        view.setUint32(40, numSamples, true);
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < numSamples; i++) bytes[44 + i] = 128;
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        return 'data:audio/wav;base64,' + btoa(binary);
+      }
+
+      function goToScreen3() {
+        screen1.hidden = true;
+        screen2.hidden = true;
+        helloLine.classList.remove('is-playing');
+        screen3.hidden = false;
+        screen4.hidden = true;
+      }
+
+      function goToScreen4() {
+        screen1.hidden = true;
+        screen2.hidden = true;
+        helloLine.classList.remove('is-playing');
+        screen3.hidden = true;
+        screen4.hidden = false;
+      }
+
+      function calendarTarget(): string {
+        return /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) ? '/e/jcw.ics' : googleCalendarUrl();
+      }
+
+      function handleEnded() {
+        const target = calendarTarget();
+        try {
+          location.assign(target);
+          goToScreen4();
+        } catch {
+          goToScreen3();
+        }
+      }
+
+
+      // Both calendar controls resolve to the guest's own platform, so the
+      // page never asks them to pick. Done once, up front: `handleEnded`
+      // may navigate away before any later code runs.
+      continueBtn.href = calendarTarget();
+      calendarLink.href = calendarTarget();
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const value = nameInput.value.trim();
+
+        if (!value) {
+          showError('We need a name to say hello.');
+          return;
+        }
+        if (!isValidName(value)) {
+          showError('Just your first name, please.');
+          return;
+        }
+        clearError();
+
+        // Unlock the player inside the gesture, before any await — no
+        // Web Audio API, it does not respect the iPhone silent switch.
+        const audio = new Audio(createSilentWavDataUri());
+        audio.play().catch(() => {});
+        audioEl = audio;
+
+        helloLine.textContent = `Hello, ${value}.`;
+        screen1.hidden = true;
+        screen2.hidden = false;
+        waitEl.hidden = false;
+
+        if (value !== prefetchedName || !prefetchPromise) prefetchVoice(value);
+        const pending = prefetchPromise as Promise<PrefetchResult>;
+
+        pending.then((result) => {
+          if ('error' in result) {
+            const message =
+              result.error === 'rate_limited'
+                ? "Too many requests right now. Here's the invitation anyway."
+                : result.error === 'invalid_name'
+                  ? 'Just your first name, please.'
+                  : "Something went wrong with the sound. Here's the invitation anyway.";
+            showError(message);
+            goToScreen4();
+            return;
+          }
+
+          if (!audioEl) return;
+          // Bound to the real greeting only: the silent unlock clip above
+          // also fires `playing`, and would clear the indicator instantly.
+          audioEl.addEventListener(
+            'playing',
+            () => {
+              waitEl.hidden = true;
+              helloLine.classList.add('is-playing');
+            },
+            { once: true },
+          );
+          audioEl.onended = handleEnded;
+          audioEl.src = result.url;
+          audioEl.play().catch(() => {
+            showError("Something went wrong with the sound. Here's the invitation anyway.");
+            goToScreen4();
+          });
+        });
+      });
+    </script>
+
+    <style>
+      .page {
+        min-height: 100svh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--sp-8) var(--gutter);
+      }
+
+      .wrap {
+        width: 100%;
+        max-width: 34rem;
+      }
+
+      .screen {
+        animation: fade-in var(--dur-slow) var(--ease) both;
+      }
+
+      .kicker {
+        font-family: var(--font-body);
+        font-size: var(--fs-xs);
+        letter-spacing: var(--tracking-eyebrow);
+        text-transform: uppercase;
+        color: var(--ink-400);
+        margin-block-end: var(--sp-3);
+      }
+
+      .title {
+        font-family: var(--font-display);
+        font-size: var(--fs-h1);
+        color: var(--ink-900);
+        margin-block-end: var(--sp-4);
+      }
+
+      .lead {
+        color: var(--ink-600);
+      }
+
+      .rule {
+        border: none;
+        border-top: 1px solid var(--yellow-400);
+        margin-block: var(--sp-6);
+      }
+
+      .field {
+        margin-block-end: var(--sp-4);
+      }
+
+      .field label {
+        display: block;
+        font-size: var(--fs-sm);
+        color: var(--ink-900);
+        margin-block-end: var(--sp-2);
+      }
+
+      .field input {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: var(--r-md);
+        padding: var(--sp-3) var(--sp-4);
+        font-family: var(--font-body);
+        font-size: var(--fs-base);
+        color: var(--ink-900);
+        background: var(--white);
+      }
+
+      .error {
+        margin-block-end: var(--sp-4);
+        font-size: var(--fs-sm);
+        color: var(--ink-900);
+      }
+
+      .hint {
+        margin-block-start: var(--sp-3);
+        font-size: var(--fs-xs);
+        color: var(--ink-400);
+        text-align: center;
+      }
+
+      .hello {
+        font-family: var(--font-display);
+        font-size: var(--fs-display);
+        color: var(--ink-900);
+        text-align: center;
+      }
+
+      .hello.is-playing {
+        animation: pulse 1.6s var(--ease) infinite;
+      }
+
+      /* Shown between the tap and the first audible word. The wait is short
+         but never zero, and a name sitting alone on a blank screen reads as
+         a page that broke. */
+      .wait {
+        width: 88px;
+        height: 2px;
+        margin: var(--sp-6) auto 0;
+        border-radius: 999px;
+        background: var(--border);
+        overflow: hidden;
+      }
+
+      .wait > span {
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--yellow-400);
+        animation: sweep 1.4s var(--ease) infinite;
+      }
+
+      .details {
+        border: 1px solid var(--border);
+        background: var(--bg-alt);
+        border-radius: var(--r-lg);
+        padding: var(--sp-6);
+        margin-block: var(--sp-6);
+      }
+
+      .details > div + div {
+        margin-block-start: var(--sp-4);
+      }
+
+      .details dt {
+        font-size: var(--fs-xs);
+        color: var(--ink-400);
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-eyebrow);
+      }
+
+      .details dd {
+        margin: 0;
+        color: var(--ink-900);
+        font-size: var(--fs-base);
+      }
+
+      /* Only the two calendar controls. The shared `.btn` carries no outer
+         spacing, and screen 1's submit button already sits in a form that
+         handles its own. */
+      #continue-btn,
+      #calendar-link {
+        margin-block: var(--sp-6);
+      }
+
+
+      .link:hover {
+        color: var(--green-500);
+      }
+
+      .foot {
+        font-size: var(--fs-xs);
+        color: var(--ink-400);
+      }
+
+      .logo {
+        display: flex;
+        justify-content: center;
+        margin-block-start: var(--sp-16);
+      }
+
+      .logo img {
+        height: 28px;
+        width: auto;
+        opacity: 0.7;
+      }
+
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      @keyframes sweep {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(250%);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .screen {
+          animation: none;
+        }
+        .hello.is-playing {
+          animation: none;
+        }
+        .wait > span {
+          animation: none;
+          width: 100%;
+          opacity: 0.6;
+        }
+      }
+    </style>
+  </body>
+</html>

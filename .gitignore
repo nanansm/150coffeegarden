@@ -11,3 +11,9 @@ dist/
 /*.jpeg
 /*.jpg
 /*.png
+
+# knowledge graph lokal - jangan di-commit
+graphify-out/
+
+# local TTS pre-warm scratch WAVs (scripts/prewarm-tts.mjs)
+scripts/.tts-out/

@@ -19,6 +19,14 @@
 /og/*
   Cache-Control: public, max-age=604800
 
+# Astro prerenders src/pages/e/jcw.ics.ts into a plain file at build time, so
+# the Response headers set in that endpoint are discarded. Pages has to be told
+# what this file is here instead -- with nosniff on, a wrong or missing type
+# means iOS never offers to open it in Calendar.
+/e/jcw.ics
+  Content-Type: text/calendar; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
 # HTML must revalidate so a deploy is visible immediately.
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
