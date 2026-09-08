@@ -79,9 +79,24 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
 
         <section id="screen-2" class="screen" hidden>
           <p id="hello-line" class="hello"></p>
-          <div id="wait" class="wait" role="status" aria-label="Preparing your greeting">
-            <span></span>
+
+          <div id="player" class="player">
+            <button type="button" id="play-btn" class="play" aria-label="Play the greeting">
+              <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+              <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true" hidden>
+                <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+              </svg>
+              <svg id="icon-replay" viewBox="0 0 24 24" aria-hidden="true" hidden>
+                <path
+                  d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"
+                />
+              </svg>
+            </button>
+            <div id="progress" class="progress"><span id="progress-fill"></span></div>
           </div>
+
+          <p id="voice-error" class="error" role="alert" hidden></p>
+          <button type="button" id="next-btn" class="btn">Next</button>
         </section>
 
         <section id="screen-3" class="screen" hidden>
@@ -141,7 +156,15 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       const screen3 = document.getElementById('screen-3') as HTMLElement;
       const screen4 = document.getElementById('screen-4') as HTMLElement;
       const helloLine = document.getElementById('hello-line') as HTMLElement;
-      const waitEl = document.getElementById('wait') as HTMLElement;
+      const playBtn = document.getElementById('play-btn') as HTMLButtonElement;
+      const iconPlay = document.getElementById('icon-play') as unknown as SVGElement;
+      const iconPause = document.getElementById('icon-pause') as unknown as SVGElement;
+      const iconReplay = document.getElementById('icon-replay') as unknown as SVGElement;
+      const player = document.getElementById('player') as HTMLElement;
+      const progress = document.getElementById('progress') as HTMLElement;
+      const progressFill = document.getElementById('progress-fill') as HTMLElement;
+      const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
+      const voiceError = document.getElementById('voice-error') as HTMLParagraphElement;
       const continueBtn = document.getElementById('continue-btn') as HTMLAnchorElement;
       const calendarLink = document.getElementById('calendar-link') as HTMLAnchorElement;
 
@@ -152,6 +175,45 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       let prefetchPromise: Promise<PrefetchResult> | null = null;
       let prefetchedName = '';
       let audioEl: HTMLAudioElement | null = null;
+
+      /**
+       * `loading` covers the gap between the tap and the greeting arriving.
+       * The player element exists from the first gesture onward — it is the
+       * only way an iPhone lets us start audio later — but it is holding a
+       * silent unlock clip until `greetingReady` flips.
+       */
+      type PlayerState = 'loading' | 'idle' | 'playing' | 'ended';
+      let playerState: PlayerState = 'loading';
+      let greetingReady = false;
+
+      /**
+       * `hidden` is an HTMLElement property; an SVGElement takes the
+       * assignment as a plain JS expando and the attribute never changes,
+       * which silently inverts every icon. The attribute has to be set by
+       * hand.
+       */
+      function showIcon(icon: SVGElement, visible: boolean) {
+        if (visible) icon.removeAttribute('hidden');
+        else icon.setAttribute('hidden', '');
+      }
+
+      function setPlayerState(next: PlayerState) {
+        playerState = next;
+        showIcon(iconPlay, next === 'idle' || next === 'loading');
+        showIcon(iconPause, next === 'playing');
+        showIcon(iconReplay, next === 'ended');
+        playBtn.disabled = next === 'loading';
+        progress.classList.toggle('is-loading', next === 'loading');
+        helloLine.classList.toggle('is-playing', next === 'playing');
+        playBtn.setAttribute(
+          'aria-label',
+          next === 'playing'
+            ? 'Pause the greeting'
+            : next === 'ended'
+              ? 'Play the greeting again'
+              : 'Play the greeting',
+        );
+      }
 
       function isValidName(value: string): boolean {
         if (!NAME_PATTERN.test(value)) return false;
@@ -243,22 +305,27 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
         return /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) ? '/e/jcw.ics' : googleCalendarUrl();
       }
 
-      function handleEnded() {
-        const target = calendarTarget();
-        try {
-          location.assign(target);
-          goToScreen4();
-        } catch {
-          goToScreen3();
-        }
-      }
-
-
       // Both calendar controls resolve to the guest's own platform, so the
-      // page never asks them to pick. Done once, up front: `handleEnded`
-      // may navigate away before any later code runs.
+      // page never asks them to pick.
       continueBtn.href = calendarTarget();
       calendarLink.href = calendarTarget();
+
+      // Continue navigates away on its own as a link. Advancing the screen
+      // first means a guest who comes back from the calendar app lands on
+      // the details rather than on the prompt they already answered.
+      continueBtn.addEventListener('click', goToScreen4);
+
+      nextBtn.addEventListener('click', goToScreen3);
+
+      playBtn.addEventListener('click', () => {
+        if (!audioEl || !greetingReady) return;
+        if (playerState === 'playing') {
+          audioEl.pause();
+          return;
+        }
+        if (playerState === 'ended') audioEl.currentTime = 0;
+        audioEl.play().catch(() => setPlayerState('idle'));
+      });
 
       form.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -279,45 +346,63 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
         const audio = new Audio(createSilentWavDataUri());
         audio.play().catch(() => {});
         audioEl = audio;
+        greetingReady = false;
+
+        // The unlock clip fires the same events as the greeting, so every
+        // handler waits for `greetingReady` before touching the UI.
+        audio.addEventListener('playing', () => {
+          if (greetingReady) setPlayerState('playing');
+        });
+        audio.addEventListener('pause', () => {
+          if (!greetingReady) return;
+          // Browsers disagree on whether `pause` fires before or after
+          // `ended` at the end of a clip, so the position decides rather
+          // than the event order. Otherwise the icon settles on play when
+          // it should offer a replay.
+          const atEnd = audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration - 0.1);
+          setPlayerState(atEnd ? 'ended' : 'idle');
+        });
+        audio.addEventListener('ended', () => {
+          if (greetingReady) setPlayerState('ended');
+        });
+        audio.addEventListener('timeupdate', () => {
+          if (!greetingReady || !audio.duration) return;
+          progressFill.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+        });
+
+        voiceError.hidden = true;
+        progressFill.style.width = '0';
+        setPlayerState('loading');
 
         helloLine.textContent = `Hello, ${value}.`;
         screen1.hidden = true;
         screen2.hidden = false;
-        waitEl.hidden = false;
 
         if (value !== prefetchedName || !prefetchPromise) prefetchVoice(value);
         const pending = prefetchPromise as Promise<PrefetchResult>;
 
         pending.then((result) => {
           if ('error' in result) {
-            const message =
+            // The guest keeps the screen and the Next button — losing the
+            // sound is not a reason to yank them somewhere else.
+            voiceError.textContent =
               result.error === 'rate_limited'
-                ? "Too many requests right now. Here's the invitation anyway."
+                ? "Too many requests right now. The sound will have to wait."
                 : result.error === 'invalid_name'
                   ? 'Just your first name, please.'
-                  : "Something went wrong with the sound. Here's the invitation anyway.";
-            showError(message);
-            goToScreen4();
+                  : "Something went wrong with the sound.";
+            voiceError.hidden = false;
+            player.hidden = true;
             return;
           }
 
           if (!audioEl) return;
-          // Bound to the real greeting only: the silent unlock clip above
-          // also fires `playing`, and would clear the indicator instantly.
-          audioEl.addEventListener(
-            'playing',
-            () => {
-              waitEl.hidden = true;
-              helloLine.classList.add('is-playing');
-            },
-            { once: true },
-          );
-          audioEl.onended = handleEnded;
+          greetingReady = true;
           audioEl.src = result.url;
-          audioEl.play().catch(() => {
-            showError("Something went wrong with the sound. Here's the invitation anyway.");
-            goToScreen4();
-          });
+          // Autoplay, still riding the unlock from the tap on screen 1. If a
+          // browser refuses it, the button falls back to `idle` and the guest
+          // starts it themselves — which is what the control is there for.
+          audioEl.play().catch(() => setPlayerState('idle'));
         });
       });
     </script>
@@ -415,21 +500,69 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       /* Shown between the tap and the first audible word. The wait is short
          but never zero, and a name sitting alone on a blank screen reads as
          a page that broke. */
-      .wait {
-        width: 88px;
-        height: 2px;
+      /* `.player` sets display:flex, which outranks the browser's own
+         [hidden] rule. Without this the error state would leave a dead
+         play button on screen. */
+      [hidden] {
+        display: none !important;
+      }
+
+      /* A mark and a line, not a widget: the greeting is the moment, and a
+         chunky media player would compete with the guest's own name. */
+      .player {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-3);
+        width: min(360px, 80%);
         margin: var(--sp-6) auto 0;
-        border-radius: 999px;
-        background: var(--border);
+      }
+
+      .play {
+        flex: none;
+        display: inline-flex;
+        padding: var(--sp-2) 0;
+        border: none;
+        background: none;
+        color: var(--green-600);
+        cursor: pointer;
+        transition: color var(--dur) var(--ease);
+      }
+
+      .play:hover {
+        color: var(--green-500);
+      }
+
+      .play:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      .play svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+
+      /* The same gold hairline as `.rule`, doing double duty: an
+         indeterminate sweep until the greeting arrives, then the real
+         playback position filling in green. One element, so the line never
+         shifts when the state changes. */
+      .progress {
+        flex: 1 1 auto;
+        height: 1px;
+        background: var(--yellow-400);
         overflow: hidden;
       }
 
-      .wait > span {
+      .progress > span {
         display: block;
-        width: 40%;
+        width: 0;
         height: 100%;
-        border-radius: inherit;
-        background: var(--yellow-400);
+        background: var(--green-600);
+      }
+
+      .progress.is-loading > span {
+        width: 40%;
         animation: sweep 1.4s var(--ease) infinite;
       }
 
@@ -462,8 +595,15 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
          spacing, and screen 1's submit button already sits in a form that
          handles its own. */
       #continue-btn,
-      #calendar-link {
+      #calendar-link,
+      #next-btn {
         margin-block: var(--sp-6);
+      }
+
+      #next-btn {
+        display: flex;
+        width: fit-content;
+        margin-inline: auto;
       }
 
 
@@ -525,7 +665,7 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
         .hello.is-playing {
           animation: none;
         }
-        .wait > span {
+        .progress.is-loading > span {
           animation: none;
           width: 100%;
           opacity: 0.6;
