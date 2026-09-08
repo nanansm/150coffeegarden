@@ -383,14 +383,11 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
 
         pending.then((result) => {
           if ('error' in result) {
-            // The guest keeps the screen and the Next button — losing the
-            // sound is not a reason to yank them somewhere else.
-            voiceError.textContent =
-              result.error === 'rate_limited'
-                ? "Too many requests right now. The sound will have to wait."
-                : result.error === 'invalid_name'
-                  ? 'Just your first name, please.'
-                  : "Something went wrong with the sound.";
+            // One line for every cause. A guest cannot act on the
+            // difference between an exhausted quota and a failed call, and
+            // naming a fault they did not cause only worries them. The
+            // reason stays in the response code for the logs.
+            voiceError.textContent = 'No sound available right now.';
             voiceError.hidden = false;
             player.hidden = true;
             return;
@@ -604,6 +601,12 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
         display: flex;
         width: fit-content;
         margin-inline: auto;
+      }
+
+      /* Screen 1's error sits under the input it belongs to and stays left.
+         This one stands alone under the name, so it centres with it. */
+      #voice-error {
+        text-align: center;
       }
 
 

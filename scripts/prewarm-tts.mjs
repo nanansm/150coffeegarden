@@ -28,7 +28,18 @@ const REPO_ROOT = join(__dirname, '..');
 
 const NAMES_FILE = join(REPO_ROOT, 'scripts', 'data', 'names-id.txt');
 const OUT_DIR = join(REPO_ROOT, 'scripts', '.tts-out');
-const GEMINI_KEY_FILE = join(homedir(), '.config', 'gemini', 'api-key');
+/**
+ * One key per Google Cloud project. The free-tier ceiling is counted per
+ * project per model, so each extra project is a genuinely separate daily
+ * allowance — two keys from the same project share one and add nothing.
+ *
+ * NOT `~/.config/gemini/api-key`: that one belongs to another project used
+ * by unrelated tooling, and spending its quota here would break that.
+ */
+const GEMINI_KEY_FILES = [
+  join(homedir(), '.config', 'gemini', '150-api-key'),
+  join(homedir(), '.config', 'gemini', '150-api-key-2'),
+];
 const R2_BUCKET = 'cdn-150web';
 const CLOUDFLARE_ACCOUNT_ID = '5f1aab7579746f239c7553d1fb3587a0';
 const MODEL = 'gemini-2.5-flash-preview-tts';
@@ -44,12 +55,19 @@ const FORCE = args.includes('--force');
 
 // --- Setup ---------------------------------------------------------------
 
-async function loadGeminiKey() {
-  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY.trim();
-  const raw = await readFile(GEMINI_KEY_FILE, 'utf8');
-  const key = raw.trim();
-  if (!key) throw new Error(`Empty Gemini key at ${GEMINI_KEY_FILE}`);
-  return key;
+async function loadGeminiKeys() {
+  if (process.env.GEMINI_API_KEY) return [process.env.GEMINI_API_KEY.trim()];
+
+  const keys = [];
+  for (const file of GEMINI_KEY_FILES) {
+    const raw = await readFile(file, 'utf8').catch(() => '');
+    const key = raw.trim();
+    if (key) keys.push(key);
+  }
+  if (keys.length === 0) {
+    throw new Error(`No Gemini key found in: ${GEMINI_KEY_FILES.join(', ')}`);
+  }
+  return keys;
 }
 
 async function loadNames() {
@@ -109,8 +127,15 @@ async function r2ObjectPut(key, filePath) {
 
 // --- Gemini TTS ------------------------------------------------------------
 
-async function generateGreetingWav(name, geminiKey) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${geminiKey}`;
+/**
+ * Keys still believed to have quota. A key that reports a per-day violation
+ * is dropped for the rest of the run rather than retried — the allowance
+ * does not come back before midnight, and retrying it on every remaining
+ * name would waste the whole run waiting.
+ */
+let liveKeys = [];
+
+async function generateGreetingWav(name) {
   const body = {
     contents: [
       {
@@ -127,15 +152,30 @@ async function generateGreetingWav(name, geminiKey) {
     },
   };
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  let res;
+  let lastError = '';
+  for (const key of [...liveKeys]) {
+    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) break;
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Gemini request failed (${res.status}): ${text.slice(0, 300)}`);
+    lastError = await res.text().catch(() => '');
+    if (res.status !== 429) {
+      throw new Error(`Gemini request failed (${res.status}): ${lastError.slice(0, 300)}`);
+    }
+    if (lastError.includes('PerDay')) {
+      liveKeys = liveKeys.filter((k) => k !== key);
+      console.warn(`quota exhausted for one key; ${liveKeys.length} left`);
+    }
+    // A 429 without `PerDay` is the per-minute ceiling: the next key is
+    // still worth trying, and the pool loop paces the rest.
+  }
+
+  if (!res || !res.ok) {
+    throw new Error(`Gemini out of quota on every key: ${lastError.slice(0, 200)}`);
   }
 
   const json = await res.json();
@@ -163,7 +203,8 @@ async function runPool(items, limit, worker) {
 // --- Main ------------------------------------------------------------------
 
 async function main() {
-  const geminiKey = DRY_RUN ? null : await loadGeminiKey();
+  liveKeys = DRY_RUN ? [] : await loadGeminiKeys();
+  if (!DRY_RUN) console.log(`gemini keys loaded: ${liveKeys.length}`);
   let names = await loadNames();
   if (LIMIT !== undefined && Number.isFinite(LIMIT)) names = names.slice(0, LIMIT);
 
@@ -192,7 +233,7 @@ async function main() {
         return;
       }
 
-      const wav = await generateGreetingWav(name, geminiKey);
+      const wav = await generateGreetingWav(name);
       const tmpPath = join(OUT_DIR, `${slug}.wav`);
       await writeFile(tmpPath, wav);
       await r2ObjectPut(key, tmpPath);

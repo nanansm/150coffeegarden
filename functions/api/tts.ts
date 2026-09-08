@@ -18,6 +18,13 @@ interface Env {
   TTS_R2: R2Bucket;
   AVAILABILITY_KV: KVNamespace;
   GEMINI_API_KEY: string;
+  /**
+   * Optional second key from a DIFFERENT Google Cloud project. The free-tier
+   * ceiling is counted per project per model, so a second project doubles the
+   * daily budget — two keys from one project would share one allowance and
+   * buy nothing.
+   */
+  GEMINI_API_KEY_2?: string;
 }
 
 const GEMINI_MODEL = 'gemini-2.5-flash-preview-tts';
@@ -120,21 +127,36 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   }
 
   try {
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${env.GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: ttsPrompt(name) }] }],
-          generationConfig: {
-            responseModalities: ['AUDIO'],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: TTS_VOICE } } },
-          },
-        }),
+    const body = JSON.stringify({
+      contents: [{ parts: [{ text: ttsPrompt(name) }] }],
+      generationConfig: {
+        responseModalities: ['AUDIO'],
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: TTS_VOICE } } },
       },
-    );
+    });
 
+    const keys = [env.GEMINI_API_KEY, env.GEMINI_API_KEY_2].filter(Boolean) as string[];
+    if (keys.length === 0) throw new Error('no Gemini key configured');
+
+    // Tried in order, moving on only when a key is out of quota. Anything
+    // else — a bad key, a model error — is a real fault and must not be
+    // masked by silently retrying on the spare.
+    let geminiRes!: Response;
+    for (const key of keys) {
+      geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`,
+        { method: 'POST', headers: { 'content-type': 'application/json' }, body },
+      );
+      if (geminiRes.status !== 429) break;
+    }
+
+    // Every key exhausted. Answering 502 here would file a spent allowance
+    // under "server fault" in the logs; the guest sees the same line either
+    // way, but the status is the only place the real reason survives.
+    if (geminiRes.status === 429) {
+      console.warn('[tts] every Gemini key is out of quota');
+      return json({ error: 'rate_limited' }, 429);
+    }
     if (!geminiRes.ok) throw new Error(`gemini status ${geminiRes.status}`);
 
     const geminiJson = await geminiRes.json();
