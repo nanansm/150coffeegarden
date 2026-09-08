@@ -95,8 +95,16 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
             <div id="progress" class="progress"><span id="progress-fill"></span></div>
           </div>
 
+          <!-- Naming what is happening, rather than asking the guest to
+               wait. The greeting is the whole point of the page, so the
+               pause before it reads better as anticipation than as an
+               apology. -->
+          <p id="status-line" class="hint"></p>
           <p id="voice-error" class="error" role="alert" hidden></p>
-          <button type="button" id="next-btn" class="btn">Next</button>
+          <!-- Hidden until the greeting is actually audible. Shown from the
+               start, it invites a guest to tap past the one thing they came
+               for. -->
+          <button type="button" id="next-btn" class="btn" hidden>Next</button>
         </section>
 
         <section id="screen-3" class="screen" hidden>
@@ -164,6 +172,7 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       const progress = document.getElementById('progress') as HTMLElement;
       const progressFill = document.getElementById('progress-fill') as HTMLElement;
       const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
+      const statusLine = document.getElementById('status-line') as HTMLParagraphElement;
       const voiceError = document.getElementById('voice-error') as HTMLParagraphElement;
       const continueBtn = document.getElementById('continue-btn') as HTMLAnchorElement;
       const calendarLink = document.getElementById('calendar-link') as HTMLAnchorElement;
@@ -187,6 +196,20 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       let greetingReady = false;
 
       /**
+       * The escape hatch. `Next` normally waits for the first audible word,
+       * but a guest must never be stuck behind a greeting that is not
+       * coming — so a failed call, or a wait this long, releases it anyway.
+       */
+      const NEXT_FALLBACK_MS = 15000;
+      let nextTimer: ReturnType<typeof setTimeout> | undefined;
+
+      function revealNext() {
+        clearTimeout(nextTimer);
+        nextTimer = undefined;
+        nextBtn.hidden = false;
+      }
+
+      /**
        * `hidden` is an HTMLElement property; an SVGElement takes the
        * assignment as a plain JS expando and the attribute never changes,
        * which silently inverts every icon. The attribute has to be set by
@@ -205,6 +228,16 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
         playBtn.disabled = next === 'loading';
         progress.classList.toggle('is-loading', next === 'loading');
         helloLine.classList.toggle('is-playing', next === 'playing');
+        helloLine.classList.toggle('is-waiting', next === 'loading');
+        // `idle` after the greeting has arrived means a browser refused the
+        // autoplay, so the line turns into the instruction it needs to be.
+        statusLine.textContent =
+          next === 'loading'
+            ? 'Getting your greeting ready\u2026'
+            : next === 'idle' && greetingReady
+              ? 'Tap play to hear it.'
+              : '';
+        statusLine.hidden = statusLine.textContent === '';
         playBtn.setAttribute(
           'aria-label',
           next === 'playing'
@@ -351,7 +384,9 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
         // The unlock clip fires the same events as the greeting, so every
         // handler waits for `greetingReady` before touching the UI.
         audio.addEventListener('playing', () => {
-          if (greetingReady) setPlayerState('playing');
+          if (!greetingReady) return;
+          setPlayerState('playing');
+          revealNext();
         });
         audio.addEventListener('pause', () => {
           if (!greetingReady) return;
@@ -372,6 +407,9 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
 
         voiceError.hidden = true;
         progressFill.style.width = '0';
+        nextBtn.hidden = true;
+        clearTimeout(nextTimer);
+        nextTimer = setTimeout(revealNext, NEXT_FALLBACK_MS);
         setPlayerState('loading');
 
         helloLine.textContent = `Hello, ${value}.`;
@@ -390,6 +428,12 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
             voiceError.textContent = 'No sound available right now.';
             voiceError.hidden = false;
             player.hidden = true;
+            statusLine.hidden = true;
+            // The state machine never leaves `loading` on this path, so the
+            // waiting pulse has to be lifted by hand or the name keeps
+            // breathing under a message that says nothing is coming.
+            helloLine.classList.remove('is-waiting');
+            revealNext();
             return;
           }
 
@@ -492,6 +536,12 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
 
       .hello.is-playing {
         animation: pulse 1.6s var(--ease) infinite;
+      }
+
+      /* Dimmer and slower than the playing pulse, so the two states never
+         read as the same thing. */
+      .hello.is-waiting {
+        animation: pulse-wait 1.8s var(--ease) infinite;
       }
 
       /* Shown between the tap and the first audible word. The wait is short
@@ -651,6 +701,16 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
         }
       }
 
+      @keyframes pulse-wait {
+        0%,
+        100% {
+          opacity: 0.55;
+        }
+        50% {
+          opacity: 0.9;
+        }
+      }
+
       @keyframes pulse {
         0%,
         100% {
@@ -667,6 +727,10 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
         }
         .hello.is-playing {
           animation: none;
+        }
+        .hello.is-waiting {
+          animation: none;
+          opacity: 0.7;
         }
         .progress.is-loading > span {
           animation: none;
