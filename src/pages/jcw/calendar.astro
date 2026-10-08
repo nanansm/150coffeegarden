@@ -1,0 +1,58 @@
+---
+import '../../styles/fonts.css';
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import '../../styles/jcw.css';
+
+const title = '150 Coffee at Jakarta Coffee Week: The Garden of Wonder';
+const days = [
+  { id: 'fri', label: 'Friday, 4 December', date: '20261204' },
+  { id: 'sat', label: 'Saturday, 5 December', date: '20261205' },
+  { id: 'sun', label: 'Sunday, 6 December', date: '20261206' },
+].map((d) => ({
+  ...d,
+  google:
+    'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+    `&text=${encodeURIComponent(title)}` +
+    `&dates=${d.date}T030000Z/${d.date}T150000Z` +
+    `&location=${encodeURIComponent('ICE BSD, Booth C94-95')}` +
+    `&details=${encodeURIComponent('Show your Surat Sayembara code to Pifi at the booth. Open 10.00–22.00 WIB.')}`,
+}));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#061D16" />
+    <title>Add The Garden of Wonder to your calendar</title>
+  </head>
+  <body class="gow">
+    <main class="gow-cal">
+      <h1 class="gow-h2">Add your visit to your calendar</h1>
+      <p class="gow-cal__info">ICE BSD · Booth C94-95 · 10.00–22.00 WIB</p>
+      <ul class="gow-cal__list">
+        {
+          days.map((d) => (
+            <li data-day={d.id}>
+              <p class="gow-cal__day">{d.label}</p>
+              <a class="gow-btn" href={d.google} target="_blank" rel="noopener">Google Calendar</a>
+              <a class="gow-cal__ics" href={`/jcw/gow-${d.id}.ics`}>Apple or other calendar (.ics)</a>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="gow-cal__back" href="/jcw">Back to The Garden of Wonder</a>
+    </main>
+    <script>
+      const d = new URLSearchParams(location.search).get('d');
+      if (d && document.querySelector(`[data-day="${CSS.escape(d)}"]`)) {
+        document.querySelectorAll<HTMLElement>('[data-day]').forEach((li) => {
+          li.hidden = li.dataset.day !== d;
+        });
+      }
+    </script>
+  </body>
+</html>

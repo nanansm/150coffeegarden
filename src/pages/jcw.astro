@@ -1,0 +1,390 @@
+---
+/**
+ * /jcw — The Garden of Wonder, 150 Coffee di Jakarta Coffee Week 2026.
+ * Standalone page (no site Header/Footer). Copy: docs/jcw-page/copy.md.
+ */
+import { Image } from 'astro:assets';
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/jcw.css';
+import heroBooth from '../assets/jcw/hero-booth.png';
+import maya from '../assets/jcw/maya.png';
+import aetheria from '../assets/jcw/aetheria.png';
+import aranya from '../assets/jcw/aranya.png';
+import lockup from '../assets/jcw/lockup.png';
+
+const widths = [480, 828, 1200, 1672];
+const sizes = '100vw';
+
+const potions = [
+  {
+    id: 'maya',
+    pos: 'top',
+    img: maya,
+    alt: 'A dark drink with a layer of crema in a glass, tropical fruit beside it',
+    hari: 'Friday, 4 December',
+    nama: 'MĀYĀ',
+    tagline: 'Looks Like Coffee. Tastes Like Tropical.',
+    isi: 'Dark espresso with crema in the glass. First sip: lime, passion fruit, pineapple. The coffee shows up last, as a trace.',
+  },
+  {
+    id: 'aetheria',
+    pos: 'mid',
+    img: aetheria,
+    alt: 'A drink sealed under a clear bubble dome, mist falling around the glass',
+    hari: 'Saturday, 5 December',
+    nama: 'AETHERIA’S SPARSHA',
+    tagline: 'Sealed Under a Bubble. Opened by Your Touch.',
+    isi: 'This one arrives sealed under a bubble dome. You touch the seal. The bubble bursts, mist falls, and the aroma is released.',
+  },
+  {
+    id: 'aranya',
+    pos: 'bot',
+    img: aranya,
+    alt: 'A clear drink in a glass with lemon basil leaves and cucumber slices',
+    hari: 'Sunday, 6 December',
+    nama: 'ARAṆYA',
+    tagline: 'Looks Like Water. Tastes Like Forest.',
+    isi: 'Clear as water in the glass. Green apple and pandan come first, then cucumber. Lemon basil, kemangi, stays on the tongue.',
+  },
+];
+
+const peran = [
+  ['Invited', 'Kofo calls you in.'],
+  ['Witness', 'Pifi opens the rules of the Buku Besar in front of you.'],
+  ['Assistant', 'You get a choice to make, or a clue to follow.'],
+  ['Activator', 'Your hand does the last step. That is the magic.'],
+  ['Bearer of Proof', 'Taste, then tell us what you found.'],
+];
+
+const kota = [
+  'Jakarta',
+  'Tangerang Selatan / BSD',
+  'Tangerang',
+  'Depok',
+  'Bekasi',
+  'Bogor',
+  'Other city',
+];
+const hari = ['Fri, 4 Dec', 'Sat, 5 Dec', 'Sun, 6 Dec'];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#061D16" />
+    <title>150 Coffee at Jakarta Coffee Week 2026, Booth C94-95</title>
+    <link
+      rel="preload"
+      href="/fonts/noto-serif-display-500.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+  </head>
+  <body class="gow">
+    <div class="gow-curtain gow-curtain--l" aria-hidden="true"></div>
+    <div class="gow-curtain gow-curtain--r" aria-hidden="true"></div>
+
+    <main>
+      <header class="gow-hero">
+        <div class="gow-hero__media">
+          <Image
+            src={heroBooth}
+            alt="The bar at the 150 Coffee booth with the Buku Besar open on the counter, visitors in front as silhouettes"
+            format="webp"
+            widths={widths}
+            sizes={sizes}
+            loading="eager"
+            fetchpriority="high"
+            class="gow-img"
+          />
+        </div>
+        <div class="gow-hero__content">
+          <p class="gow-hero__top">150 Coffee at Jakarta Coffee Week 2026</p>
+          <h1 class="gow-vh">The Garden of Wonder</h1>
+          <Image
+            src={lockup}
+            alt=""
+            width={1000}
+            class="gow-hero__lockup"
+            loading="eager"
+            aria-hidden="true"
+          />
+          <p class="gow-hero__info"><span>4–6 December 2026</span><span class="gow-sep" aria-hidden="true"> · </span><span>ICE BSD · Booth C94-95</span></p>
+          <a class="gow-btn" href="#surat">Get the Surat Sayembara</a>
+        </div>
+      </header>
+
+      <section class="gow-story" aria-labelledby="cerita-h">
+        <div class="gow-story__orn" aria-hidden="true">
+          <span></span>
+          <svg viewBox="0 0 48 24" width="48" height="24" fill="none" stroke="#C3A66B" stroke-width="1.2">
+            <path d="M4 12h12M32 12h12" />
+            <path d="M24 3c5 4 5 14 0 18-5-4-5-14 0-18z" />
+            <path d="M24 5v14" />
+          </svg>
+        </div>
+        <h2 id="cerita-h" class="gow-h2">The curtain stays closed until the Peramu arrives</h2>
+        <p class="gow-story__text">
+          Our booth is a bar behind a green curtain. On the bar lies the Buku Besar, the Great Book of Pegologi. It lists three potions, and it only reacts when someone is watching. Copi el Mejik, our Peramu, must prove all three before the Garden closes for another eleven years. So he needs you at the bar.
+        </p>
+      </section>
+
+      <section class="gow-ramuan" aria-labelledby="ramuan-h">
+        <h2 id="ramuan-h" class="gow-h2 gow-ramuan__title">One drink each day, Friday to Sunday</h2>
+        {
+          potions.map((p) => (
+            <article class={`gow-potion gow-potion--${p.id} gow-potion--${p.pos}`}>
+              <div class="gow-potion__media">
+                <Image
+                  src={p.img}
+                  alt={p.alt}
+                  format="webp"
+                  widths={widths}
+                  sizes={sizes}
+                  loading="lazy"
+                  class="gow-img"
+                />
+              </div>
+              <div class="gow-potion__text">
+                <p class="gow-potion__day">{p.hari}</p>
+                <h3 class="gow-potion__name">{p.nama}</h3>
+                <p class="gow-potion__tag">{p.tagline}</p>
+                <p class="gow-potion__body">{p.isi}</p>
+              </div>
+            </article>
+          ))
+        }
+      </section>
+
+      <section class="gow-peran" aria-labelledby="peran-h">
+        <h2 id="peran-h" class="gow-h2">Your part at the bar, in five steps</h2>
+        <ol class="gow-peran__list">
+          {
+            peran.map(([nama, isi]) => (
+              <li>
+                <span class="gow-peran__body">
+                  <strong>{nama}</strong>
+                  <span>{isi}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="gow-surat" id="surat" aria-labelledby="surat-h">
+        <div class="gow-paper">
+          <svg class="gow-paper__seal" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+            <circle cx="32" cy="32" r="28" fill="#0D4F33" />
+            <circle cx="32" cy="32" r="22" fill="none" stroke="#C3A66B" stroke-width="1.5" />
+            <path d="M32 16c8 6 8 26 0 32-8-6-8-26 0-32z" fill="none" stroke="#C3A66B" stroke-width="1.5" />
+            <path d="M32 18v28" stroke="#C3A66B" stroke-width="1.5" />
+          </svg>
+          <h2 id="surat-h" class="gow-paper__title">Get your Surat Sayembara, free</h2>
+          <p class="gow-paper__intro">
+            The Surat Sayembara is your letter of invitation. Leave your name and WhatsApp number. You get priority entry when the curtain opens, and we send you the Peramu’s arrival schedule on WhatsApp before the event.
+          </p>
+
+          <form id="gow-form" novalidate>
+            <div class="gow-field">
+              <label for="f-nama">Name</label>
+              <input id="f-nama" name="nama" type="text" autocomplete="name" required />
+              <p class="gow-err" id="e-nama" hidden></p>
+            </div>
+
+            <div class="gow-field">
+              <label for="f-wa">WhatsApp number</label>
+              <input
+                id="f-wa"
+                name="wa"
+                type="tel"
+                inputmode="numeric"
+                autocomplete="tel"
+                required
+                aria-describedby="h-wa"
+              />
+              <p class="gow-help" id="h-wa">Used only to send you the Peramu’s arrival schedule.</p>
+              <p class="gow-err" id="e-wa" hidden></p>
+            </div>
+
+            <div class="gow-field">
+              <label for="f-kota">City</label>
+              <select id="f-kota" name="kota" required>
+                <option value="" selected>Pick your city</option>
+                {kota.map((k) => <option value={k}>{k}</option>)}
+              </select>
+              <p class="gow-err" id="e-kota" hidden></p>
+            </div>
+
+            <fieldset class="gow-field gow-days" id="f-hari">
+              <legend>Which day are you coming?</legend>
+              <div class="gow-chips">
+                {
+                  hari.map((h) => (
+                    <label class="gow-chip">
+                      <input type="radio" name="hari" value={h} />
+                      <span>{h}</span>
+                    </label>
+                  ))
+                }
+              </div>
+              <p class="gow-err" id="e-hari" hidden></p>
+            </fieldset>
+
+            <p class="gow-err" id="e-form" role="alert" hidden>Your letter was not sent. Please try again.</p>
+            <button type="submit" class="gow-btn gow-btn--form">Send my letter</button>
+          </form>
+
+          <div id="gow-sealed-wrap" aria-live="polite">
+            <div id="gow-sealed" class="gow-sealed" tabindex="-1" hidden>
+              <h3 class="gow-sealed__title">Your letter is sealed</h3>
+              <p class="gow-sealed__code" id="s-kode"></p>
+              <p class="gow-sealed__text">
+                Send this code to our WhatsApp to receive your invitation and a calendar link. Show the code to Pifi at the booth.
+              </p>
+              <a class="gow-btn" id="s-wa" href="https://wa.me/6281222809995" target="_blank" rel="noopener">Send on WhatsApp</a>
+              <p class="gow-sealed__meta"><span id="s-nama"></span> · <span id="s-hari"></span></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="gow-info" aria-labelledby="info-h">
+        <h2 id="info-h" class="gow-h2">Find us at ICE BSD</h2>
+        <dl class="gow-info__list">
+          <div><dt>Date</dt><dd>4–6 December 2026</dd></div>
+          <div><dt>Hours</dt><dd>10.00–22.00 WIB</dd></div>
+          <div><dt>Venue</dt><dd>ICE BSD</dd></div>
+          <div><dt>Booth</dt><dd>The Garden of Wonder, C94-95</dd></div>
+        </dl>
+        <figure class="gow-quote">
+          <blockquote>
+            <p>Look for the closed green curtain at Booth C94-95.</p>
+          </blockquote>
+        </figure>
+      </section>
+    </main>
+
+    <footer class="gow-foot">
+      <p>150 Coffee × Jakarta Coffee Week 2026 · <a href="/">150coffeegarden.com</a></p>
+    </footer>
+
+    <script>
+      const KEY = 'gow-surat';
+      const form = document.getElementById('gow-form') as HTMLFormElement | null;
+      const sealed = document.getElementById('gow-sealed') as HTMLElement | null;
+      const intro = document.querySelector('.gow-paper__intro') as HTMLElement | null;
+
+      const WA = '6281222809995';
+      const waUrl = (d: { nama: string; hari: string; kode: string }) =>
+        `https://wa.me/${WA}?text=` +
+        encodeURIComponent(
+          `Hi 150 Coffee, this is ${d.nama}. My Surat Sayembara code is ${d.kode}. I'm coming on ${d.hari}.`
+        );
+
+      function showSealed(data: { nama: string; hari: string; kode: string }, focus: boolean) {
+        if (!form || !sealed) return;
+        (document.getElementById('s-wa') as HTMLAnchorElement).href = waUrl(data);
+        (document.getElementById('s-kode') as HTMLElement).textContent = data.kode;
+        (document.getElementById('s-nama') as HTMLElement).textContent = data.nama;
+        (document.getElementById('s-hari') as HTMLElement).textContent = data.hari;
+        form.hidden = true;
+        if (intro) intro.hidden = true;
+        sealed.hidden = false;
+        if (focus) sealed.focus();
+      }
+
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (raw) {
+          const d = JSON.parse(raw);
+          if (d && d.nama && d.hari && d.kode) showSealed(d, false);
+        }
+      } catch (_) {}
+
+      function source() {
+        const q = new URLSearchParams(location.search);
+        const utm = ['utm_source', 'utm_medium', 'utm_campaign'].map((k) => q.get(k) || '').join('/');
+        if (utm !== '//') return utm;
+        try {
+          return document.referrer ? new URL(document.referrer).host : 'direct';
+        } catch (_) {
+          return 'direct';
+        }
+      }
+
+      function setError(fieldId: string, errId: string, msg: string | null, extraDesc = '') {
+        const field = document.getElementById(fieldId) as HTMLElement;
+        const err = document.getElementById(errId) as HTMLElement;
+        if (msg) {
+          err.textContent = msg;
+          err.hidden = false;
+          field.setAttribute('aria-invalid', 'true');
+          field.setAttribute('aria-describedby', (extraDesc + ' ' + errId).trim());
+        } else {
+          err.textContent = '';
+          err.hidden = true;
+          field.removeAttribute('aria-invalid');
+          if (extraDesc) field.setAttribute('aria-describedby', extraDesc);
+          else field.removeAttribute('aria-describedby');
+        }
+      }
+
+      form?.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const nama = (document.getElementById('f-nama') as HTMLInputElement).value.trim();
+        const wa = (document.getElementById('f-wa') as HTMLInputElement).value.replace(/[\s-]/g, '');
+        const kota = (document.getElementById('f-kota') as HTMLSelectElement).value;
+        const picked = form.querySelector('input[name="hari"]:checked') as HTMLInputElement | null;
+
+        const okNama = (nama.match(/\p{L}/gu) || []).length >= 2;
+        const okWa = /^(\+62|62|0)8\d{7,12}$/.test(wa);
+        const okKota = kota !== '';
+        const okHari = !!picked;
+
+        setError('f-nama', 'e-nama', okNama ? null : 'Please type your name.');
+        setError('f-wa', 'e-wa', okWa ? null : 'Type a WhatsApp number, like 081234567890.', 'h-wa');
+        setError('f-kota', 'e-kota', okKota ? null : 'Pick your city.');
+        setError('f-hari', 'e-hari', okHari ? null : 'Pick one day.');
+
+        if (!okNama) return (document.getElementById('f-nama') as HTMLElement).focus();
+        if (!okWa) return (document.getElementById('f-wa') as HTMLElement).focus();
+        if (!okKota) return (document.getElementById('f-kota') as HTMLElement).focus();
+        if (!okHari) return (form.querySelector('input[name="hari"]') as HTMLElement).focus();
+
+        const hari = (picked as HTMLInputElement).value;
+        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        const fail = document.getElementById('e-form') as HTMLElement;
+        fail.hidden = true;
+        btn.disabled = true;
+        try {
+          const res = await fetch('/api/jcw-surat', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ nama, wa, kota, hari, sumber: source() }),
+          });
+          const out = await res.json();
+          if (!res.ok || !out.ok || !out.code) throw new Error('rejected');
+          const data = { nama, hari, kode: out.code as string };
+          try {
+            localStorage.setItem(KEY, JSON.stringify(data));
+          } catch (_) {}
+          showSealed(data, true);
+          // In-app browsers often block this jump; the button in the sealed panel is the fallback.
+          setTimeout(() => {
+            location.href = waUrl(data);
+          }, 1500);
+        } catch (_) {
+          fail.hidden = false;
+          btn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

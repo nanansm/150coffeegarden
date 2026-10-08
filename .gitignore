@@ -17,3 +17,6 @@ graphify-out/
 
 # local TTS pre-warm scratch WAVs (scripts/prewarm-tts.mjs)
 scripts/.tts-out/
+
+# local secrets for wrangler pages dev
+.dev.vars

@@ -1,0 +1,13 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//150 Coffee//Garden of Wonder//EN
+BEGIN:VEVENT
+UID:gow-sun-2026@150coffeegarden.com
+DTSTAMP:20261008T000000Z
+DTSTART:20261206T030000Z
+DTEND:20261206T150000Z
+SUMMARY:150 Coffee at Jakarta Coffee Week: The Garden of Wonder
+LOCATION:ICE BSD\, Booth C94-95
+DESCRIPTION:Show your Surat Sayembara code to Pifi at the booth. Open 10.00-22.00 WIB.
+END:VEVENT
+END:VCALENDAR
