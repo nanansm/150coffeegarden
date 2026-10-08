@@ -8,10 +8,39 @@
  * hidden. A <noscript><style> override flips that for JS-less visits, so
  * the page still makes sense without any script running.
  */
-import '../../styles/fonts.css';
-import '../../styles/tokens.css';
-import '../../styles/base.css';
-import { jcwEvent } from '../../data/jcw';
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import { jcwEvent } from '../data/jcw';
+import { Image } from 'astro:assets';
+import heroBooth from '../assets/jcw/hero-booth.png';
+import maya from '../assets/jcw/maya.png';
+import aetheria from '../assets/jcw/aetheria.png';
+import aranya from '../assets/jcw/aranya.png';
+import lockup from '../assets/jcw/lockup.png';
+
+const bgWidths = [480, 828, 1200, 1672];
+const thumbWidths = [240, 480];
+const potions = [
+  {
+    img: maya,
+    alt: 'A dark drink with a layer of crema in a glass, tropical fruit beside it',
+    nama: 'MĀYĀ',
+    day: 'Fri 4 Dec',
+  },
+  {
+    img: aetheria,
+    alt: 'A drink sealed under a clear bubble dome, mist falling around the glass',
+    nama: 'AETHERIA’S SPARSHA',
+    day: 'Sat 5 Dec',
+  },
+  {
+    img: aranya,
+    alt: 'A clear drink in a glass with lemon basil leaves and cucumber slices',
+    nama: 'ARAṆYA',
+    day: 'Sun 6 Dec',
+  },
+];
 
 const MONTHS = [
   'January',
@@ -46,6 +75,8 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#061D16" />
+    <link rel="preload" href="/fonts/noto-serif-display-500-italic.woff2" as="font" type="font/woff2" crossorigin />
     <title>You are invited — 150 Coffee Garden</title>
     <noscript>
       <style>
@@ -59,9 +90,27 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
     </noscript>
   </head>
   <body>
+    <div class="curtain curtain--l" aria-hidden="true"></div>
+    <div class="curtain curtain--r" aria-hidden="true"></div>
+    <div class="backdrop" aria-hidden="true">
+      <Image
+        src={heroBooth}
+        alt=""
+        format="webp"
+        widths={bgWidths}
+        sizes="100vw"
+        loading="eager"
+        aria-hidden="true"
+        class="backdrop__img"
+      />
+    </div>
     <div class="page">
+      <div class="logo">
+        <img src="/brand/logo-green.webp" srcset="/brand/logo-green.webp 1x, /brand/logo-green@2x.webp 2x" alt="150 Coffee Garden" />
+      </div>
       <div class="wrap">
         <section id="screen-1" class="screen">
+          <Image src={lockup} alt="The Garden of Wonder" width={1000} loading="eager" class="lockup" />
           <p class="kicker">150 COFFEE GARDEN</p>
           <h1 class="title">You are invited.</h1>
           <p class="lead">We're bringing the garden to Jakarta Coffee Week.</p>
@@ -144,17 +193,32 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
             }
           </dl>
           <a id="calendar-link" class="btn" href="/e/jcw.ics">Continue</a>
+          <ul class="potions">
+            {
+              potions.map((p) => (
+                <li>
+                  <Image
+                    src={p.img}
+                    alt={p.alt}
+                    format="webp"
+                    widths={thumbWidths}
+                    sizes="(min-width: 28rem) 9rem, 30vw"
+                    loading="lazy"
+                    class="potions__img"
+                  />
+                  <span class="potions__name">{p.nama}</span>
+                  <span class="potions__day">{p.day}</span>
+                </li>
+              ))
+            }
+          </ul>
           <p class="foot">Your name is used only for this greeting.</p>
         </section>
-
-        <div class="logo">
-          <img src="/brand/logo-green.webp" srcset="/brand/logo-green.webp 1x, /brand/logo-green@2x.webp 2x" alt="150 Coffee Garden" />
-        </div>
       </div>
     </div>
 
     <script>
-      import { googleCalendarUrl } from '../../data/jcw';
+      import { googleCalendarUrl } from '../data/jcw';
 
       const nameInput = document.getElementById('guest-name') as HTMLInputElement;
       const form = document.getElementById('invite-form') as HTMLFormElement;
@@ -449,99 +513,225 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
     </script>
 
     <style>
+      @font-face {
+        font-family: 'Noto Serif Display';
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+        src: url('/fonts/noto-serif-display-500.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Noto Serif Display';
+        font-weight: 500;
+        font-style: italic;
+        font-display: swap;
+        src: url('/fonts/noto-serif-display-500-italic.woff2') format('woff2');
+      }
+
+      :global(html),
+      :global(body) {
+        margin: 0;
+        background: #061d16;
+        overflow-x: clip;
+      }
+
       .page {
+        --gow-forest: #061d16;
+        --gow-garden: #0d4f33;
+        --gow-leaf: #2f7a4c;
+        --gow-gold: #c3a66b;
+        --gow-copper: #c98b42;
+        --gow-cream: #f3ebdd;
+        --gow-display: 'Noto Serif Display', 'Times New Roman', serif;
+
+        box-sizing: border-box;
         min-height: 100svh;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: var(--sp-8) var(--gutter);
+        padding: 3rem 1.25rem;
+        position: relative;
+        z-index: 1;
+        color: var(--gow-cream);
+        font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
+        font-size: 1.0625rem;
+        line-height: 1.65;
+        overflow-x: clip;
+      }
+
+      .page *,
+      .page *::before,
+      .page *::after {
+        box-sizing: border-box;
+      }
+
+      .page :focus-visible {
+        outline: 2px solid var(--gow-gold);
+        outline-offset: 3px;
       }
 
       .wrap {
         width: 100%;
-        max-width: 34rem;
+        max-width: 28rem;
+        min-width: 0;
       }
 
       .screen {
-        animation: fade-in var(--dur-slow) var(--ease) both;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0;
+        padding-block: 2rem;
+        margin: 0;
+      }
+
+      .screen p {
+        margin: 0;
       }
 
       .kicker {
-        font-family: var(--font-body);
-        font-size: var(--fs-xs);
-        letter-spacing: var(--tracking-eyebrow);
+        font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
+        font-size: 0.75rem;
+        letter-spacing: 0.18em;
         text-transform: uppercase;
-        color: var(--ink-400);
-        margin-block-end: var(--sp-3);
+        color: var(--gow-gold);
+        margin-block-end: 1.5rem;
       }
 
       .title {
-        font-family: var(--font-display);
-        font-size: var(--fs-h1);
-        color: var(--ink-900);
-        margin-block-end: var(--sp-4);
+        font-family: var(--gow-display);
+        font-style: normal; /* the "500" file holds the slanted cut, same as /jcw headings */
+        font-weight: 500;
+        font-size: clamp(2.5rem, 11vw, 3.75rem);
+        line-height: 1.05;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+        color: var(--gow-cream);
+        margin: 0 0 1.5rem;
       }
 
       .lead {
-        color: var(--ink-600);
+        color: var(--gow-cream);
+        opacity: 0.88;
+        text-wrap: pretty;
       }
 
       .rule {
         border: none;
-        border-top: 1px solid var(--yellow-400);
-        margin-block: var(--sp-6);
+        border-top: 1px solid var(--gow-gold);
+        opacity: 0.6;
+        margin-block: 2rem;
+        width: 100%;
       }
 
       .field {
-        margin-block-end: var(--sp-4);
+        margin-block-end: 1.25rem;
       }
 
       .field label {
         display: block;
-        font-size: var(--fs-sm);
-        color: var(--ink-900);
-        margin-block-end: var(--sp-2);
+        font-size: 0.8125rem;
+        color: var(--gow-gold);
+        margin-block-end: 0.25rem;
       }
 
       .field input {
         width: 100%;
-        border: 1px solid var(--border);
-        border-radius: var(--r-md);
-        padding: var(--sp-3) var(--sp-4);
-        font-family: var(--font-body);
-        font-size: var(--fs-base);
-        color: var(--ink-900);
-        background: var(--white);
+        min-height: 3rem;
+        border: none;
+        border-bottom: 1px solid var(--gow-gold);
+        border-radius: 0;
+        padding: 0.5rem 0;
+        font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
+        font-size: 1.25rem;
+        color: var(--gow-cream);
+        background: transparent;
+        appearance: none;
+        -webkit-appearance: none;
+      }
+
+      .field input::placeholder {
+        color: var(--gow-cream);
+        opacity: 0.6;
+      }
+
+      .field input:focus,
+      .field input:focus-visible {
+        outline: none;
+        border-bottom-width: 2px;
+        padding-bottom: calc(0.5rem - 1px);
+        box-shadow: 0 1px 0 0 var(--gow-gold);
       }
 
       .error {
-        margin-block-end: var(--sp-4);
-        font-size: var(--fs-sm);
-        color: var(--ink-900);
+        margin-block-end: 1.25rem;
+        font-size: 0.9375rem;
+        color: #f2b8a8;
       }
 
       .hint {
-        margin-block-start: var(--sp-3);
-        font-size: var(--fs-xs);
-        color: var(--ink-400);
+        margin-block-start: 1rem;
+        font-size: 0.875rem;
+        color: var(--gow-cream);
+        opacity: 0.75;
         text-align: center;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 3rem;
+        padding: 0.75rem 1.75rem;
+        border: none;
+        border-radius: 4px;
+        background: var(--gow-copper);
+        color: var(--gow-forest);
+        font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.2;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .btn:hover {
+        background: #d89a50;
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      #invite-form .btn {
+        width: 100%;
       }
 
       .hello {
-        font-family: var(--font-display);
-        font-size: var(--fs-display);
-        color: var(--ink-900);
+        font-family: var(--gow-display);
+        font-style: normal; /* the "500" file holds the slanted cut, same as /jcw headings */
+        font-weight: 500;
+        font-size: clamp(2.25rem, 10vw, 3.5rem);
+        line-height: 1.1;
+        text-wrap: balance;
+        overflow-wrap: anywhere;
+        color: var(--gow-cream);
         text-align: center;
       }
 
-      .hello.is-playing {
-        animation: pulse 1.6s var(--ease) infinite;
-      }
+      @media (prefers-reduced-motion: no-preference) {
+        .hello.is-playing {
+          animation: pulse 1.6s ease-in-out infinite;
+        }
 
-      /* Dimmer and slower than the playing pulse, so the two states never
-         read as the same thing. */
-      .hello.is-waiting {
-        animation: pulse-wait 1.8s var(--ease) infinite;
+        /* Dimmer and slower than the playing pulse, so the two states never
+           read as the same thing. */
+        .hello.is-waiting {
+          animation: pulse-wait 1.8s ease-in-out infinite;
+        }
       }
 
       /* Shown between the tap and the first audible word. The wait is short
@@ -559,24 +749,30 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       .player {
         display: flex;
         align-items: center;
-        gap: var(--sp-3);
-        width: min(360px, 80%);
-        margin: var(--sp-6) auto 0;
+        gap: 1rem;
+        width: 100%;
+        max-width: 22rem;
+        margin: 2.5rem auto 0;
       }
 
       .play {
         flex: none;
         display: inline-flex;
-        padding: var(--sp-2) 0;
-        border: none;
-        background: none;
-        color: var(--green-600);
+        align-items: center;
+        justify-content: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        padding: 0;
+        border: 1px solid var(--gow-gold);
+        border-radius: 50%;
+        background: transparent;
+        color: var(--gow-cream);
         cursor: pointer;
-        transition: color var(--dur) var(--ease);
+        transition: background-color 0.2s ease;
       }
 
       .play:hover {
-        color: var(--green-500);
+        background: rgba(195, 166, 107, 0.16);
       }
 
       .play:disabled {
@@ -585,8 +781,8 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       }
 
       .play svg {
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
         fill: currentColor;
       }
 
@@ -597,7 +793,7 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       .progress {
         flex: 1 1 auto;
         height: 1px;
-        background: var(--yellow-400);
+        background: rgba(195, 166, 107, 0.45);
         overflow: hidden;
       }
 
@@ -605,37 +801,42 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
         display: block;
         width: 0;
         height: 100%;
-        background: var(--green-600);
+        background: var(--gow-cream);
       }
 
       .progress.is-loading > span {
         width: 40%;
-        animation: sweep 1.4s var(--ease) infinite;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .progress.is-loading > span {
+          animation: sweep 1.4s ease-in-out infinite;
+        }
       }
 
       .details {
-        border: 1px solid var(--border);
-        background: var(--bg-alt);
-        border-radius: var(--r-lg);
-        padding: var(--sp-6);
-        margin-block: var(--sp-6);
+        margin: 2rem 0 0;
+        padding: 0;
+        border-top: 1px solid var(--gow-gold);
       }
 
-      .details > div + div {
-        margin-block-start: var(--sp-4);
+      .details > div {
+        padding-block: 1rem;
+        border-bottom: 1px solid rgba(195, 166, 107, 0.35);
       }
 
       .details dt {
-        font-size: var(--fs-xs);
-        color: var(--ink-400);
+        font-size: 0.75rem;
+        color: var(--gow-gold);
         text-transform: uppercase;
-        letter-spacing: var(--tracking-eyebrow);
+        letter-spacing: 0.18em;
       }
 
       .details dd {
-        margin: 0;
-        color: var(--ink-900);
-        font-size: var(--fs-base);
+        margin: 0.25rem 0 0;
+        color: var(--gow-cream);
+        font-size: 1.0625rem;
+        overflow-wrap: anywhere;
       }
 
       /* Only the two calendar controls. The shared `.btn` carries no outer
@@ -644,10 +845,12 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       #continue-btn,
       #calendar-link,
       #next-btn {
-        margin-block: var(--sp-6);
+        margin-block: 2rem;
+        align-self: flex-start;
       }
 
       #next-btn {
+        align-self: auto;
         display: flex;
         width: fit-content;
         margin-inline: auto;
@@ -660,25 +863,172 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       }
 
 
+      .link {
+        color: var(--gow-gold);
+      }
+
       .link:hover {
-        color: var(--green-500);
+        color: var(--gow-cream);
       }
 
       .foot {
-        font-size: var(--fs-xs);
-        color: var(--ink-400);
+        font-size: 0.875rem;
+        color: var(--gow-cream);
+        opacity: 0.75;
       }
 
       .logo {
+        position: absolute;
+        top: 1rem;
+        left: 0;
+        right: 0;
         display: flex;
         justify-content: center;
-        margin-block-start: var(--sp-16);
+      }
+
+      .backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        background: #061d16;
+      }
+
+      .backdrop :global(img) {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .backdrop::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(to bottom, rgba(6, 29, 22, 0.55) 0%, rgba(6, 29, 22, 0.78) 45%, rgba(6, 29, 22, 0.94) 100%),
+          radial-gradient(ellipse 70% 50% at 50% 38%, rgba(6, 29, 22, 0.5), transparent 75%);
+      }
+
+      .screen :global(.lockup) {
+        display: block;
+        width: 100%;
+        max-width: 15rem;
+        height: auto;
+        margin: 0 0 1.5rem;
+        filter: brightness(1.25) drop-shadow(0 0 22px rgba(6, 29, 22, 0.95));
+      }
+
+      .potions {
+        list-style: none;
+        margin: 0 0 2rem;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.5rem;
+      }
+
+      .potions li {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .potions :global(.potions__img) {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 5;
+        object-fit: cover;
+        border-radius: 2px;
+      }
+
+      .potions__name {
+        margin-block-start: 0.5rem;
+        font-family: var(--gow-display);
+        font-style: normal;
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.25;
+        color: var(--gow-cream);
+        overflow-wrap: anywhere;
+      }
+
+      .potions__day {
+        margin-block-start: 0.25rem;
+        font-size: 0.6875rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--gow-gold);
+      }
+
+      .curtain {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 50%;
+        z-index: 100;
+        pointer-events: none;
+        background:
+          linear-gradient(to bottom, transparent 82%, rgba(6, 29, 22, 0.55) 100%),
+          repeating-linear-gradient(90deg, #0d4f33 0, #0d4f33 34px, #0b4530 52px, #0d4f33 70px);
+        animation-duration: 1.4s;
+        animation-delay: 0.45s;
+        animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+        animation-fill-mode: forwards;
+      }
+
+      .curtain--l {
+        left: 0;
+        box-shadow: 1px 0 0 0 #c3a66b, 0 0 18px 2px rgba(195, 166, 107, 0.45);
+        animation-name: curtain-open-l;
+      }
+
+      .curtain--r {
+        right: 0;
+        box-shadow: -1px 0 0 0 #c3a66b, 0 0 18px 2px rgba(195, 166, 107, 0.45);
+        animation-name: curtain-open-r;
+      }
+
+      @keyframes curtain-open-l {
+        0% {
+          transform: translateX(0);
+          visibility: visible;
+        }
+        99.9% {
+          visibility: visible;
+        }
+        100% {
+          transform: translateX(-100%);
+          visibility: hidden;
+        }
+      }
+
+      @keyframes curtain-open-r {
+        0% {
+          transform: translateX(0);
+          visibility: visible;
+        }
+        99.9% {
+          visibility: visible;
+        }
+        100% {
+          transform: translateX(100%);
+          visibility: hidden;
+        }
       }
 
       .logo img {
         height: 28px;
         width: auto;
-        opacity: 0.7;
+        max-width: 100%;
+        opacity: 0.85;
+        filter: brightness(0) invert(0.93) sepia(0.15);
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .screen {
+          animation: fade-in 0.5s ease both;
+        }
       }
 
       @keyframes fade-in {
@@ -722,6 +1072,9 @@ const hours = `${jcwEvent.doorsOpen}–${jcwEvent.doorsClose} WIB`;
       }
 
       @media (prefers-reduced-motion: reduce) {
+        .curtain {
+          display: none;
+        }
         .screen {
           animation: none;
         }

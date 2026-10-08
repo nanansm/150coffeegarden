@@ -1,5 +1,5 @@
 /**
- * Builds the printed invitation QR for /e/jcw: a black QR with the 150
+ * Builds the printed invitation QR for /invitationjcw: a black QR with the 150
  * logogram knocked into the middle.
  *
  * The centre logo is deliberate damage — it covers modules the scanner
@@ -23,7 +23,7 @@ import jsQR from 'jsqr';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = path.join(ROOT, 'assets/qr');
 
-const TARGET_URL = 'https://150coffeegarden.com/e/jcw/';
+const TARGET_URL = 'https://150coffeegarden.com/invitationjcw';
 
 /** Source lockup. Rows 0-480 are the logogram; 519-563 are the wordmark. */
 const LOCKUP = path.join(ROOT, 'public/brand/logo-black@2x.webp');
