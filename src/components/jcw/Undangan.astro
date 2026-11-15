@@ -1,0 +1,337 @@
+---
+/**
+ * The Garden of Wonder — undangan digital personal Jacoweek 2026.
+ *
+ * Satu halaman, tujuh layar (gambar dari tim desain, 1080x1920, area
+ * transparan diisi warna krem). Konten ditaruh di zona persen tinggi layar:
+ * frame dikunci minimal 9:16 sehingga posisi vertikal selalu cocok dengan
+ * ilustrasi, sisi kiri/kanan yang terpotong di HP tinggi.
+ *
+ * Alur: Sampul -> Hello {nama} + suara -> Menu (Kalender, Lokasi, Jadwal,
+ * RSVP) -> RSVP masuk Google Sheet lewat /api/jcw-rsvp -> redirect WA admin.
+ */
+import '../../styles/fonts.css';
+
+interface Props {
+  guest?: { slug: string; nama: string; panggilan: string; grup: string } | null;
+}
+const { guest = null } = Astro.props;
+
+const WA_ADMIN = '6281222809995';
+const sapaan = guest ? guest.panggilan : 'Sahabat Pegology';
+const audio = guest ? `https://cdn.150coffeegarden.com/tts/jcw/inv/${guest.slug}.mp3` : '';
+
+// Nama pertunjukan per hari (ID + EN) dari tim 150 Coffee.
+const hari = [
+  { day: 'DAY 1', tgl: 'Jumat, 4 Des 2026', value: 'Jumat, 4 Des 2026', show: 'Liburan dalam Cawan', en: 'A Holiday in a Chalice' },
+  { day: 'DAY 2', tgl: 'Sabtu, 5 Des 2026', value: 'Sabtu, 5 Des 2026', show: 'Kenangan yang Terbakar', en: 'Burning Memories' },
+  { day: 'DAY 3', tgl: 'Minggu, 6 Des 2026', value: 'Minggu, 6 Des 2026', show: 'Cawan Terakhir', en: 'The Last Chalice' },
+];
+
+const showPending = hari.every((h) => !h.show);
+
+const gcal =
+  'https://calendar.google.com/calendar/render?' +
+  new URLSearchParams({
+    action: 'TEMPLATE',
+    text: 'The Garden of Wonder — 150 Coffee Garden at Jacoweek 2026',
+    dates: '20261204T030000Z/20261204T133000Z',
+    recur: 'RRULE:FREQ=DAILY;COUNT=3',
+    details: 'Undangan The Garden of Wonder #SensoryExperience. Buka setiap hari 10.00–20.30 WIB.',
+    location: 'ICE BSD City, Hall 9 & 10',
+  }).toString();
+const maps = 'https://www.google.com/maps/search/?api=1&query=ICE+BSD+City+Hall+9';
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{guest ? `Undangan untuk ${sapaan} — ` : ''}The Garden of Wonder · Jacoweek 2026</title>
+    <meta name="description" content="Sebuah undangan dari Negeri Pegology. 4–6 Desember 2026, ICE BSD Hall 9 & 10." />
+    <meta property="og:title" content="The Garden of Wonder · Jacoweek 2026" />
+    <meta property="og:description" content="Sebuah undangan dari Negeri Pegology. 4–6 Desember 2026, ICE BSD Hall 9 & 10." />
+    <meta property="og:image" content="https://150coffeegarden.com/jcw/inv/s1.webp" />
+    <meta name="theme-color" content="#fffdf5" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="preload" as="image" href="/jcw/inv/s1.webp" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/noto-serif-display-500.woff2" crossorigin />
+  </head>
+  <body>
+    <main class="frame" data-slug={guest?.slug ?? ''} data-nama={guest?.nama ?? ''} data-grup={guest?.grup ?? ''} data-audio={audio} data-wa={WA_ADMIN}>
+      <!-- 1. Sampul awal -->
+      <section class="scr is-on" id="s1" style="--bg:url(/jcw/inv/s1.webp)">
+        <div class="z" style="top:79%">
+          <p class="diundang">ANDA DIUNDANG</p>
+          <button class="btn btn-light" type="button" data-go="s2" data-unlock>Buka Undangan</button>
+        </div>
+      </section>
+
+      <!-- 2. Hello {nama} + suara -->
+      <section class="scr" id="s2" style="--bg:url(/jcw/inv/s2.webp)">
+        <div class="z" style="top:55.5%">
+          {audio && (
+            <button class="play" type="button" id="play" aria-label="Putar pesan suara">
+              <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+              <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
+            </button>
+          )}
+          <p class="hello">HELLO, {sapaan.toUpperCase()}</p>
+        </div>
+        <div class="z" style="top:72%">
+          <p class="kicker">SEBUAH UNDANGAN DARI</p>
+          <h1 class="h1">NEGERI PEGOLOGY</h1>
+          <p class="lead">Sebuah perjalanan indrawi bagi manusia, di mana setiap sudut menyimpan cerita dan setiap perjumpaan menghadirkan jenis keajaiban yang baru.</p>
+          <button class="btn" type="button" data-go="s3">Selanjutnya</button>
+        </div>
+      </section>
+
+      <!-- 3. Menu -->
+      <section class="scr" id="s3" style="--bg:url(/jcw/inv/s3.webp)">
+        <div class="z" style="top:30%">
+          <p class="when">4 – 6 DESEMBER 2026<br />10.00 – 20.30 WIB</p>
+          <nav class="menu">
+            <a class="btn" href={gcal} target="_blank" rel="noopener" id="cal">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2zm-2 7h14v10H5z" /></svg>Kalender
+            </a>
+            <button class="btn" type="button" data-go="s4">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" /></svg>Lokasi
+            </button>
+            <button class="btn" type="button" data-go="s5">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z" /></svg>Jadwal Pertunjukan
+            </button>
+            <button class="btn btn-gold" type="button" data-go="s6">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" /></svg>Konfirmasi Kehadiran
+            </button>
+          </nav>
+        </div>
+      </section>
+
+      <!-- 4. Lokasi -->
+      <section class="scr" id="s4" style="--bg:url(/jcw/inv/s4.webp)">
+        <button class="back" type="button" data-go="s3" aria-label="Kembali ke menu">‹</button>
+        <div class="z" style="top:21%">
+          <h2 class="h2">LOKASI JACOWEEK 2026</h2>
+          <figure class="loc">
+            <img src="/jcw/inv/ice-bsd.webp" alt="Gedung ICE BSD City" width="900" height="506" loading="lazy" />
+            <figcaption><b>ICE BSD City</b><span>Hall 9 &amp; 10</span></figcaption>
+          </figure>
+          <p class="small">Jl. BSD Grand Boulevard No.1, Pagedangan, Tangerang, Banten</p>
+          <a class="btn" href={maps} target="_blank" rel="noopener">Buka Google Maps</a>
+        </div>
+      </section>
+
+      <!-- 5. Jadwal pertunjukan -->
+      <section class="scr" id="s5" style="--bg:url(/jcw/inv/s5.webp)">
+        <button class="back" type="button" data-go="s3" aria-label="Kembali ke menu">‹</button>
+        <div class="z" style="top:20%">
+          <h2 class="h2">RUNDOWN PERTUNJUKAN</h2>
+          <p class="kicker">THE GARDEN OF WONDER</p>
+          <ol class="rundown">
+            {hari.map((h, i) => (
+              <li>
+                <span class="num">{i + 1}</span>
+                <div>
+                  <p class="r-day">{h.day} · {h.tgl}</p>
+                  <p class="r-show">{h.show ? h.show : 'Pertunjukan'}</p>
+                  {h.en && <p class="r-en">{h.en}</p>}
+                  <p class="r-time">Sesi 1 14.00 WIB · Sesi 2 16.00 WIB</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p class="small" hidden={!showPending}>Nama pertunjukan tiap hari segera diumumkan.</p>
+        </div>
+      </section>
+
+      <!-- 6. RSVP -->
+      <section class="scr" id="s6" style="--bg:url(/jcw/inv/s6.webp)">
+        <button class="back" type="button" data-go="s3" aria-label="Kembali ke menu">‹</button>
+        <div class="z" style="top:13.5%">
+          <h2 class="h2">KONFIRMASI KEHADIRAN</h2>
+          <p class="small">Kami sangat menantikan kehadiranmu di JACOWEEK 2026.<br />Yuk, konfirmasi sekarang!</p>
+          <form id="rsvp" class="rsvp" novalidate>
+            <label class="field"><span class="sr">Nama Lengkap</span>
+              <input name="nama" required minlength="2" maxlength="80" autocomplete="name" placeholder="Nama Lengkap" value={guest?.nama ?? ''} />
+            </label>
+            <label class="field"><span class="sr">Email</span>
+              <input name="email" type="email" maxlength="80" autocomplete="email" placeholder="Email (boleh dikosongkan)" />
+            </label>
+            <label class="field"><span class="sr">Pilih Tanggal</span>
+              <select name="tanggal" required>
+                <option value="" selected disabled>Pilih Tanggal</option>
+                {hari.map((h) => <option value={h.value}>{h.tgl} · {h.show}</option>)}
+              </select>
+            </label>
+            <label class="field"><span class="sr">Jumlah Kehadiran</span>
+              <select name="jumlah" required>
+                <option value="" selected disabled>Jumlah Kehadiran</option>
+                {[1, 2, 3, 4, 5].map((n) => <option value={n}>{n} orang</option>)}
+              </select>
+            </label>
+            <p class="err" id="err" role="alert"></p>
+            <button class="btn btn-gold" type="submit" id="kirim">Konfirmasi →</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 7. Sampul akhir -->
+      <section class="scr" id="s7" style="--bg:url(/jcw/inv/s7.webp)">
+        <div class="z" style="top:21%">
+          <svg class="check" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" /><path d="m15 24.5 6 6 12-13" /></svg>
+          <h2 class="h1">SAMPAI JUMPA!</h2>
+          <p class="lead">Kehadiranmu telah kami catat.<br />Terima kasih telah menjadi bagian dari perjalanan ini.</p>
+          <p class="small" id="wa-note">Mengarahkan ke WhatsApp admin…</p>
+          <a class="btn" id="wa-link" href={`https://wa.me/${WA_ADMIN}`}>Buka WhatsApp</a>
+          <p class="kicker" style="margin-top:1cqh">PETUALANGAN MENANTIMU</p>
+        </div>
+      </section>
+      {audio ? <audio id="vo" preload="none" src={audio} /> : null}
+    </main>
+
+    <script>
+      const frame = document.querySelector<HTMLElement>('.frame')!;
+      const vo = document.getElementById('vo') as HTMLAudioElement | null;
+      const play = document.getElementById('play');
+      const go = (id: string) => {
+        document.querySelectorAll('.scr').forEach((s) => s.classList.toggle('is-on', s.id === id));
+        if (id !== 's2' && vo && !vo.paused) vo.pause();
+        history.replaceState(null, '', location.pathname + (id === 's1' ? '' : '#' + id));
+        if (id === 's2' && vo && vo.dataset.played !== '1') {
+          vo.dataset.played = '1';
+          vo.play().catch(() => {});
+        }
+      };
+      document.querySelectorAll<HTMLElement>('[data-go]').forEach((b) =>
+        b.addEventListener('click', () => {
+          // Buka kunci autoplay di dalam gesture tap pertama.
+          if (b.hasAttribute('data-unlock') && vo) vo.load();
+          go(b.dataset.go!);
+        }),
+      );
+      if (vo && play) {
+        const sync = () => play.classList.toggle('on', !vo.paused);
+        vo.addEventListener('play', sync);
+        vo.addEventListener('pause', sync);
+        vo.addEventListener('ended', sync);
+        play.addEventListener('click', () => (vo.paused ? vo.play().catch(() => {}) : vo.pause()));
+      }
+      // Kalender: iPhone/Mac pakai .ics, lainnya Google Calendar.
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        const cal = document.getElementById('cal') as HTMLAnchorElement;
+        cal.href = '/e/jcw-undangan.ics';
+        cal.removeAttribute('target');
+      }
+      const start = location.hash.slice(1);
+      if (/^s[3-6]$/.test(start)) go(start);
+
+      const form = document.getElementById('rsvp') as HTMLFormElement;
+      const err = document.getElementById('err')!;
+      const kirim = document.getElementById('kirim') as HTMLButtonElement;
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const f = new FormData(form);
+        const nama = String(f.get('nama') || '').trim();
+        const tanggal = String(f.get('tanggal') || '');
+        const jumlah = String(f.get('jumlah') || '');
+        const email = String(f.get('email') || '').trim();
+        if (nama.length < 2) return void (err.textContent = 'Isi nama lengkap dulu, ya.');
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return void (err.textContent = 'Format email belum benar.');
+        if (!tanggal) return void (err.textContent = 'Pilih tanggal kedatangan.');
+        if (!jumlah) return void (err.textContent = 'Pilih jumlah yang hadir.');
+        err.textContent = '';
+        kirim.disabled = true;
+        kirim.textContent = 'Mengirim…';
+        const d = frame.dataset;
+        const pesan =
+          `Halo Admin 150 Coffee Garden, saya ${nama} konfirmasi hadir di The Garden of Wonder (Jacoweek 2026) ` +
+          `pada ${tanggal}, ${jumlah} orang.` + (d.slug ? ` (Kode undangan: ${d.slug})` : '');
+        const wa = `https://wa.me/${d.wa}?text=${encodeURIComponent(pesan)}`;
+        // Simpan ke Sheet dulu, maksimal 6 detik. Gagal tetap lanjut ke WA:
+        // admin masih menerima konfirmasinya lewat chat.
+        try {
+          const ctl = new AbortController();
+          const t = setTimeout(() => ctl.abort(), 6000);
+          await fetch('/api/jcw-rsvp', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ nama, email, tanggal, jumlah, slug: d.slug, namaLink: d.nama, grup: d.grup }),
+            signal: ctl.signal,
+            keepalive: true,
+          });
+          clearTimeout(t);
+        } catch {}
+        (document.getElementById('wa-link') as HTMLAnchorElement).href = wa;
+        go('s7');
+        setTimeout(() => (location.href = wa), 1600);
+      });
+    </script>
+
+    <style is:global>
+      @font-face {
+        font-family: 'Noto Serif Display';
+        font-weight: 500;
+        font-display: swap;
+        src: url('/fonts/noto-serif-display-500.woff2') format('woff2');
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; background: #efe9dc; }
+      body { min-height: 100svh; display: grid; place-items: center; font-family: 'DM Sans', 'DM Sans Fallback', system-ui, sans-serif; color: #2c3e2d; -webkit-tap-highlight-color: transparent; }
+      .frame { --green: #36513a; --ink: #2c3e2d; --gold: #c5a059; --cream: #fffdf5;
+        position: relative; width: min(100vw, 56.25svh); height: 100svh; overflow: hidden; container-type: size; background: var(--cream); box-shadow: 0 0 40px rgb(0 0 0 / .12); }
+      .scr { position: absolute; inset: 0; background: var(--bg) center / cover no-repeat, var(--cream); opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s .5s; }
+      .scr.is-on { opacity: 1; visibility: visible; transition: opacity .5s ease; }
+      .z { position: absolute; left: 50%; transform: translateX(-50%); width: min(84%, 86cqw); display: flex; flex-direction: column; align-items: center; gap: 1.4cqh; text-align: center; }
+      .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .h1, .h2, .diundang, .hello, .kicker, .when, .r-show { font-family: 'Noto Serif Display', Georgia, serif; font-weight: 500; letter-spacing: .04em; margin: 0; }
+      .h1 { font-size: 3.4cqh; color: var(--green); line-height: 1.1; }
+      .h2 { font-size: 2.6cqh; color: var(--green); line-height: 1.15; }
+      .kicker { font-size: 1.5cqh; color: var(--gold); letter-spacing: .18em; }
+      .lead { font-size: 1.65cqh; line-height: 1.45; margin: 0; color: var(--ink); max-width: 34ch; }
+      .small { font-size: 1.4cqh; line-height: 1.4; margin: 0; color: var(--ink); opacity: .85; }
+      .diundang { font-size: 3.2cqh; color: #fff; letter-spacing: .22em; text-shadow: 0 2px 10px rgb(0 0 0 / .45); }
+      .when { font-size: 1.75cqh; color: var(--green); line-height: 1.5; letter-spacing: .1em; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: .6em; min-height: 5.2cqh; padding: 0 2.2em; border: 0; border-radius: 999px; background: var(--green); color: #fff; font: 600 1.7cqh/1 'DM Sans', system-ui, sans-serif; letter-spacing: .02em; text-decoration: none; cursor: pointer; box-shadow: 0 4px 14px rgb(30 50 35 / .25); transition: transform .15s, filter .15s; }
+      .btn:active { transform: scale(.97); }
+      .btn:hover { filter: brightness(1.08); }
+      .btn:disabled { opacity: .6; }
+      .btn svg { width: 1.2em; height: 1.2em; fill: currentColor; flex: none; }
+      .btn-light { background: var(--cream); color: var(--green); }
+      .btn-gold { background: linear-gradient(180deg, #d8b46a, #b8903f); color: #23331f; }
+      .menu { display: flex; flex-direction: column; gap: 1.3cqh; width: 78%; margin-top: 1cqh; }
+      .menu .btn { width: 100%; justify-content: flex-start; padding-left: 1.6em; }
+      .hello { font-size: 2.3cqh; color: var(--ink); background: rgb(255 253 245 / .88); border: 1.5px solid var(--green); border-radius: 999px; padding: .55em 1.4em; letter-spacing: .08em; backdrop-filter: blur(2px); }
+      .play { width: 7cqh; height: 7cqh; border-radius: 50%; border: 2px solid rgb(255 255 255 / .9); background: var(--green); color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 0 0 0 rgb(54 81 58 / .5); animation: pulse 2.2s infinite; }
+      .play svg { width: 45%; height: 45%; fill: currentColor; }
+      .play .i-pause, .play.on .i-play { display: none; }
+      .play.on .i-pause { display: block; }
+      .play.on { animation: none; }
+      @keyframes pulse { 70% { box-shadow: 0 0 0 2.2cqh rgb(54 81 58 / 0); } 100% { box-shadow: 0 0 0 0 rgb(54 81 58 / 0); } }
+      .back { position: absolute; top: 2cqh; left: 4cqw; z-index: 2; width: 5cqh; height: 5cqh; border-radius: 50%; border: 1.5px solid var(--green); background: rgb(255 253 245 / .9); color: var(--green); font-size: 3.4cqh; line-height: 1; cursor: pointer; }
+      .loc { margin: .5cqh 0 0; width: 100%; border: 2px solid var(--gold); border-radius: 18px; overflow: hidden; background: var(--green); }
+      .loc img { display: block; width: 100%; height: 15cqh; object-fit: cover; object-position: center 60%; }
+      .loc figcaption { display: flex; justify-content: space-between; align-items: baseline; padding: 1.2cqh 1.1em; color: #fff; }
+      .loc b { font: 500 2.2cqh 'Noto Serif Display', serif; }
+      .loc span { font-size: 1.6cqh; }
+      .rundown { list-style: none; padding: 0; margin: .6cqh 0 0; width: 100%; display: flex; flex-direction: column; gap: 1cqh; }
+      .rundown li { position: relative; display: flex; align-items: center; gap: 1em; text-align: left; background: var(--cream); border: 1.5px solid var(--gold); border-radius: 16px; padding: 1cqh .9em; }
+      .num { flex: none; width: 4.2cqh; height: 4.2cqh; display: grid; place-items: center; background: #a8862a; color: #fff; border-radius: 10px; font: 500 2.2cqh 'Noto Serif Display', serif; }
+      .rundown p { margin: 0; }
+      .r-day { font-size: 1.3cqh; font-weight: 600; letter-spacing: .06em; color: #a8862a; text-transform: uppercase; }
+      .r-show { font-size: 1.95cqh; line-height: 1.15; color: var(--green); }
+      .r-en { font-size: 1.4cqh; font-style: italic; opacity: .75; }
+      .r-time { font-size: 1.35cqh; opacity: .8; }
+      .rsvp { width: 100%; display: flex; flex-direction: column; gap: 1.1cqh; margin-top: .6cqh; }
+      .field input, .field select { width: 100%; height: 5.2cqh; padding: 0 1.3em; border: 1.5px solid var(--gold); border-radius: 999px; background: #fff; color: var(--ink); font: 400 1.65cqh 'DM Sans', system-ui, sans-serif; appearance: none; -webkit-appearance: none; }
+      .field select { background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2336513a' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 1em center / 1.4em no-repeat; padding-right: 2.8em; text-overflow: ellipsis; }
+      .field select:invalid { color: #7b847a; }
+      .field input:focus, .field select:focus { outline: 2px solid var(--green); outline-offset: 1px; }
+      .err { min-height: 1.6cqh; margin: 0; font-size: 1.4cqh; color: #a33a2a; }
+      .check { width: 7cqh; height: 7cqh; fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+      #s7 .h1 { margin-top: .5cqh; }
+      @media (prefers-reduced-motion: reduce) { .scr, .scr.is-on { transition: none; } .play { animation: none; } }
+    </style>
+  </body>
+</html>
