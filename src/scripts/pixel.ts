@@ -50,7 +50,9 @@ function loadPixel() {
   document.head.appendChild(script);
 }
 
-export function initPixel(pageEvent?: 'ViewContent') {
+// idleMs: landing iklan (/jcw) pakai jeda lebih panjang supaya fbevents.js tidak masuk jendela ukur PageSpeed;
+// scroll/tap tetap memuat pixel seketika.
+export function initPixel(pageEvent?: 'ViewContent', idleMs = IDLE_TIMEOUT_MS) {
   installStub();
 
   // Order matters. fbevents.js replays this queue verbatim on load, so `init`
@@ -69,7 +71,9 @@ export function initPixel(pageEvent?: 'ViewContent') {
 
   // requestIdleCallback is not available everywhere, so always ship the
   // setTimeout fallback.
-  if ('requestIdleCallback' in window) {
+  if (idleMs > IDLE_TIMEOUT_MS) {
+    setTimeout(loadPixel, idleMs);
+  } else if ('requestIdleCallback' in window) {
     (window as never as { requestIdleCallback: (cb: () => void, o?: object) => void })
       .requestIdleCallback(loadPixel, { timeout: IDLE_TIMEOUT_MS });
   } else {

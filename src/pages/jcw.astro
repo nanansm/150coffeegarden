@@ -1,317 +1,346 @@
 ---
 /**
- * /jcw — The Garden of Wonder, 150 Coffee di Jakarta Coffee Week 2026.
- * Standalone page (no site Header/Footer). Copy: docs/jcw-page/copy.md.
+ * /jcw — landing The Garden of Wonder (biolink IG + traffic Meta Ads).
+ * Gaya sama dengan undangan /invitationjcw (krem, hijau, emas, Noto Serif Display),
+ * tapi satu halaman scroll supaya form langsung terjangkau. Teks: ~/jcw-review/jcwpage/copy-final.md.
+ * Gambar sudah dikecilkan statis di /public/jcw/lp (tanpa pipeline astro:assets).
  */
-import { Image } from 'astro:assets';
 import '../styles/fonts.css';
-import '../styles/tokens.css';
-import '../styles/base.css';
-import '../styles/jcw.css';
-import heroBooth from '../assets/jcw/hero-booth.png';
-import maya from '../assets/jcw/maya.png';
-import aetheria from '../assets/jcw/aetheria.png';
-import aranya from '../assets/jcw/aranya.png';
-import lockup from '../assets/jcw/lockup.png';
-
-const widths = [480, 828, 1200, 1672];
-const sizes = '100vw';
 
 const potions = [
   {
-    id: 'maya',
-    pos: 'top',
-    img: maya,
-    alt: 'A dark drink with a layer of crema in a glass, tropical fruit beside it',
-    hari: 'Friday, 4 December',
+    img: 'maya',
+    alt: 'Minuman gelap dengan lapisan crema di gelas, buah tropis di sampingnya',
+    hari: 'Jumat, 4 Desember',
     nama: 'MĀYĀ',
     tagline: 'Looks Like Coffee. Tastes Like Tropical.',
-    isi: 'Dark espresso with crema in the glass. First sip: lime, passion fruit, pineapple. The coffee shows up last, as a trace.',
+    isi: 'Dilihat sekilas, ini espresso gelap lengkap dengan crema. Diminum, yang terasa jeruk nipis, markisa, dan nanas. Kopinya baru muncul samar di akhir.',
   },
   {
-    id: 'aetheria',
-    pos: 'mid',
-    img: aetheria,
-    alt: 'A drink sealed under a clear bubble dome, mist falling around the glass',
-    hari: 'Saturday, 5 December',
+    img: 'aetheria',
+    alt: 'Minuman tertutup kubah gelembung bening, kabut turun di sekitar gelas',
+    hari: 'Sabtu, 5 Desember',
     nama: 'AETHERIA’S SPARSHA',
     tagline: 'Sealed Under a Bubble. Opened by Your Touch.',
-    isi: 'This one arrives sealed under a bubble dome. You touch the seal. The bubble bursts, mist falls, and the aroma is released.',
+    isi: 'Minumannya datang tertutup kubah gelembung. Sekali kamu sentuh, gelembungnya pecah, kabut turun, dan aromanya menyebar.',
   },
   {
-    id: 'aranya',
-    pos: 'bot',
-    img: aranya,
-    alt: 'A clear drink in a glass with lemon basil leaves and cucumber slices',
-    hari: 'Sunday, 6 December',
+    img: 'aranya',
+    alt: 'Minuman bening dengan daun kemangi dan irisan mentimun',
+    hari: 'Minggu, 6 Desember',
     nama: 'ARAṆYA',
     tagline: 'Looks Like Water. Tastes Like Forest.',
-    isi: 'Clear as water in the glass. Green apple and pandan come first, then cucumber. Lemon basil, kemangi, stays on the tongue.',
+    isi: 'Bening seperti air, tapi rasanya apel hijau, pandan, dan mentimun. Di akhir ada sedikit kemangi.',
   },
 ];
 
 const peran = [
-  ['Invited', 'Kofo calls you in.'],
-  ['Witness', 'Pifi opens the rules of the Buku Besar in front of you.'],
-  ['Assistant', 'You get a choice to make, or a clue to follow.'],
-  ['Activator', 'Your hand does the last step. That is the magic.'],
-  ['Bearer of Proof', 'Taste, then tell us what you found.'],
+  ['Kamu disambut', 'Kofo menyambut kamu, lalu mengantarmu masuk.'],
+  ['Lihat aturannya', 'Pifi menunjukkan aturan mainnya di Buku Besar, buku ramuan yang ada di bar.'],
+  ['Bantu meracik', 'Kamu ikut memilih, lalu bantu meracik minuman hari itu.'],
+  ['Selesaikan sendiri', 'Sentuhan terakhirnya kamu yang kerjakan.'],
+  ['Ceritakan rasanya', 'Cicipi, lalu ceritakan ke kami rasanya gimana.'],
 ];
 
-const kota = [
-  'Jakarta',
-  'Tangerang Selatan / BSD',
-  'Tangerang',
-  'Depok',
-  'Bekasi',
-  'Bogor',
-  'Other city',
+const kota = ['Jakarta', 'Tangerang Selatan / BSD', 'Tangerang', 'Depok', 'Bekasi', 'Bogor', 'Kota lain'];
+// value harus sama dengan DAYS di functions/api/jcw-surat.ts
+const hari = [
+  ['Fri, 4 Dec', 'Jumat, 4 Des'],
+  ['Sat, 5 Dec', 'Sabtu, 5 Des'],
+  ['Sun, 6 Dec', 'Minggu, 6 Des'],
 ];
-const hari = ['Fri, 4 Dec', 'Sat, 5 Dec', 'Sun, 6 Dec'];
+const maps = 'https://www.google.com/maps/search/?api=1&query=ICE+BSD+City';
+const desc =
+  '150 Coffee ada di Jakarta Coffee Week, 4-6 Desember 2026, Booth C94-95 ICE BSD. Tiap hari ada satu minuman. Daftar gratis biar bisa masuk duluan.';
 ---
-
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex" />
-    <meta name="theme-color" content="#061D16" />
-    <title>150 Coffee at Jakarta Coffee Week 2026, Booth C94-95</title>
-    <link
-      rel="preload"
-      href="/fonts/noto-serif-display-500.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-  </head>
-  <body class="gow">
-    <div class="gow-curtain gow-curtain--l" aria-hidden="true"></div>
-    <div class="gow-curtain gow-curtain--r" aria-hidden="true"></div>
+    <meta name="theme-color" content="#fffdf5" />
+    <title>The Garden of Wonder · 150 Coffee di Jakarta Coffee Week 2026, Booth C94-95</title>
+    <meta name="description" content={desc} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://150coffeegarden.com/jcw/" />
+    <meta property="og:title" content="The Garden of Wonder · 150 Coffee, Booth C94-95" />
+    <meta property="og:description" content={desc} />
+    <meta property="og:image" content="https://150coffeegarden.com/jcw/lp/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.ico" />
+    <style is:global>
+      @font-face { font-family: 'Noto Serif Display'; font-weight: 500; font-display: swap; src: url('/fonts/noto-serif-display-500.woff2') format('woff2'); }
+      :root { --green: #36513a; --ink: #2c3e2d; --gold: #c5a059; --cream: #fffdf5; --line: #e6d9b8; --gold-ink: #85662a; }
+      *, *::before, *::after { box-sizing: border-box; }
+      html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+      body { margin: 0; background: #efe8d6; color: var(--ink); font: 400 16px/1.55 'DM Sans', 'DM Sans Fallback', system-ui, sans-serif; }
+      .page { max-width: 520px; margin: 0 auto; background: var(--cream); box-shadow: 0 0 40px rgb(0 0 0 / .1); overflow: hidden; }
+      img { display: block; max-width: 100%; height: auto; }
+      .serif, h1, h2, h3 { font-family: 'Noto Serif Display', Georgia, serif; font-weight: 500; margin: 0; }
+      .kicker { font-family: 'Noto Serif Display', Georgia, serif; color: var(--gold-ink); letter-spacing: .18em; font-size: .78rem; text-transform: uppercase; margin: 0; }
+      h2 { color: var(--green); font-size: clamp(1.5rem, 6.4vw, 1.9rem); line-height: 1.2; text-wrap: balance; letter-spacing: .01em; }
+      p { margin: 0; }
+      .sec { padding: 56px 24px; text-align: center; }
+      main > .sec, .foot { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+      .sec > * + * { margin-top: 14px; }
+      .lead { max-width: 34ch; margin-inline: auto; text-wrap: pretty; }
+      .orn { width: 120px; height: 12px; margin: 0 auto; color: var(--gold); }
 
-    <main>
-      <header class="gow-hero">
-        <div class="gow-hero__media">
-          <Image
-            src={heroBooth}
-            alt="The bar at the 150 Coffee booth with the Buku Besar open on the counter, visitors in front as silhouettes"
-            format="webp"
-            widths={widths}
-            sizes={sizes}
-            loading="eager"
-            fetchpriority="high"
-            class="gow-img"
-          />
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5em; min-height: 52px; padding: 0 28px; border: 0; border-radius: 999px; background: var(--green); color: #fff; font: 600 1rem/1 'DM Sans', system-ui, sans-serif; text-decoration: none; cursor: pointer; transition: transform .15s, filter .15s; }
+      .btn:hover { filter: brightness(1.1); }
+      .btn:active { transform: scale(.97); }
+      .btn:disabled { opacity: .6; cursor: wait; }
+      .btn-gold { background: linear-gradient(180deg, #d8b46a, #b8903f); color: #23331f; }
+      .btn-line { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
+      .btn svg { width: 1.15em; height: 1.15em; fill: currentColor; }
+      :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+      /* Hero: ilustrasi undangan (s4) — logo 1G atas, lanskap bawah, tengah kosong untuk teks */
+      .hero { text-align: center; background: var(--cream); }
+      .hero .land { display: block; width: 100%; height: auto; margin-top: 8px; }
+      .hero-in { position: relative; z-index: 1; display: grid; justify-items: center; gap: 16px; padding: 36px 24px 0; }
+      .hero .kicker { max-width: 24ch; text-wrap: balance; line-height: 1.6; }
+      .hero .when b { font-weight: 600; }
+      .hero .logo { display: block; height: auto; }
+      .hero .logo { width: min(80vw, 320px); }
+      .hero .sub { max-width: 26ch; font-size: 1.05rem; text-wrap: balance; }
+      .when { font-family: 'Noto Serif Display', Georgia, serif; color: var(--green); font-size: .95rem; letter-spacing: .04em; line-height: 1.5; }
+      .when b { font-weight: 500; color: var(--gold-ink); }
+      .hero .btn { margin-top: 6px; margin-bottom: 20px; box-shadow: 0 8px 22px rgb(54 81 58 / .25); }
+
+      .story { background: var(--green); color: #f3ecd8; }
+      .story h2 { color: #fff; }
+      .story .kicker { color: #e2c27e; }
+
+      .potions { display: grid; gap: 22px; margin-top: 28px; text-align: left; }
+      .potion { border: 1.5px solid var(--line); border-radius: 18px; overflow: hidden; background: #fff; }
+      .potion img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: 70% 40%; }
+      .potion { box-shadow: 0 4px 18px rgb(54 81 58 / .08); }
+      .potion .body { padding: 18px 18px 20px; }
+      .potion .day { display: inline-block; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-ink); font-weight: 600; }
+      .potion h3 { color: var(--green); font-size: 1.5rem; margin-top: 4px; letter-spacing: .04em; }
+      .potion .tag { font-family: 'Noto Serif Display', Georgia, serif; color: var(--ink); margin-top: 4px; text-wrap: balance; }
+      .potion .isi { margin-top: 6px; font-size: .96rem; }
+
+      .steps { list-style: none; padding: 0; margin: 28px 0 0; text-align: left; counter-reset: s; display: grid; gap: 12px; }
+      .steps li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start; padding: 14px 16px; border-radius: 14px; background: #f7f1e1; }
+      .steps li::before { content: counter(s); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--gold-ink); color: var(--green); font: 500 1.15rem/1 'Noto Serif Display', Georgia, serif; font-variant-numeric: lining-nums; margin-top: 2px; }
+      .steps b { display: block; color: var(--green); font: 500 1.1rem 'Noto Serif Display', Georgia, serif; }
+      .steps span { font-size: .95rem; line-height: 1.45; display: block; margin-top: 2px; text-wrap: pretty; }
+
+      .surat { background: #f7f1e1; }
+      .card { margin-top: 24px; padding: 24px 20px; background: #fff; border: 1.5px solid var(--gold); border-radius: 20px; text-align: left; }
+      .field { margin: 0 0 16px; padding: 0; border: 0; min-width: 0; }
+      .field label, .field legend { display: block; font-weight: 600; color: var(--green); margin-bottom: 6px; padding: 0; }
+      .field input[type=text], .field input[type=tel], .field select { width: 100%; min-height: 50px; padding: 0 14px; border: 1.5px solid #a99a74; border-radius: 12px; background: var(--cream); color: var(--ink); font: 400 16px 'DM Sans', system-ui, sans-serif; }
+      .field select { appearance: none; background: var(--cream) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2336513a' stroke-width='2'/%3E%3C/svg%3E") right 16px center no-repeat; }
+      .field [aria-invalid=true] { border-color: #b3261e; }
+      .help { font-size: .85rem; color: #55604f; margin-top: 6px; }
+      .err { color: #b3261e; font-size: .88rem; margin-top: 6px; }
+      .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .chip { position: relative; }
+      .chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+      .chip span { font-size: .88rem !important; display: grid; place-items: center; min-height: 50px; padding: 4px; border: 1.5px solid #a99a74; white-space: nowrap; border-radius: 12px; text-align: center; font-size: .88rem; font-weight: 600; color: var(--green); line-height: 1.2; }
+      .chip input:checked + span { background: var(--green); border-color: var(--green); color: #fff; }
+      .chip input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
+      .card .btn { width: 100%; }
+      .sealed { text-align: center; }
+      .sealed > * + * { margin-top: 12px; }
+      .sealed h3 { color: var(--green); font-size: 1.35rem; }
+      .code { font: 500 2rem/1.2 'Noto Serif Display', Georgia, serif; color: var(--gold-ink); letter-spacing: .12em; }
+      .meta { font-size: .9rem; opacity: .75; }
+      .sealed:focus { outline: none; }
+
+      .info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; text-align: left; }
+      .info div { padding: 14px; border-radius: 14px; background: #f7f1e1; }
+      .info dt { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--gold-ink); font-weight: 600; }
+      .info dd { margin: 2px 0 0; color: var(--green); font: 500 1.05rem/1.3 'Noto Serif Display', Georgia, serif; }
+      .loc { margin: 16px 0 0; border: 1.5px solid var(--gold); border-radius: 18px; overflow: hidden; }
+      .loc img { width: 100%; aspect-ratio: 16 / 8; object-fit: cover; object-position: center 60%; }
+      .ctas { display: grid; gap: 10px; margin-top: 18px; }
+      .foot { padding: 0 0 88px; }
+      .foot img { width: 100%; }
+      .foot p { padding: 14px 24px 28px; text-align: center; font-size: .875rem; color: #4a5a4b; }
+
+      /* CTA lengket di HP, hilang saat form terlihat */
+      .sticky { position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translate(-50%, 140%); z-index: 9; transition: transform .3s; width: min(calc(100% - 48px), 488px); }
+      .sticky .btn { width: 100%; border: 1.5px solid var(--gold); box-shadow: 0 10px 28px rgb(0 0 0 / .3); }
+      .sticky.on { transform: translate(-50%, 0); }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .sticky, .btn { transition: none; } }
+      @media (min-width: 560px) { body { padding: 24px 0; } .page { border-radius: 24px; } }
+      @media (max-width: 359px) { .chips { grid-template-columns: 1fr; } .info { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div class="hero-in">
+          <p class="kicker">Jakarta Coffee Week 2026</p>
+          <h1><img class="logo" src="/jcw/lp/gow-360.webp" srcset="/jcw/lp/gow-360.webp 360w, /jcw/lp/gow-560.webp 560w" sizes="min(80vw, 320px)" alt="The Garden of Wonder" width="360" height="241" fetchpriority="high" /></h1>
+          <p class="sub">Daftar gratis, biar kamu bisa masuk duluan ke booth kami.</p>
+          <p class="when">Jumat–Minggu, 4–6 Desember 2026<br />Jakarta Coffee Week · ICE BSD<br /><b>Booth C94-95</b></p>
+          <a class="btn" href="#surat" data-cta="hero">Isi Surat Sayembara</a>
         </div>
-        <div class="gow-hero__content">
-          <p class="gow-hero__top">150 Coffee at Jakarta Coffee Week 2026</p>
-          <h1 class="gow-vh">The Garden of Wonder</h1>
-          <Image
-            src={lockup}
-            alt=""
-            width={1000}
-            class="gow-hero__lockup"
-            loading="eager"
-            aria-hidden="true"
-          />
-          <p class="gow-hero__info"><span>4–6 December 2026</span><span class="gow-sep" aria-hidden="true"> · </span><span>ICE BSD · Booth C94-95</span></p>
-          <a class="gow-btn" href="#surat">Get the Surat Sayembara</a>
-        </div>
+        <img class="land" src="/jcw/lp/land-540.webp" srcset="/jcw/lp/land-540.webp 540w, /jcw/lp/land-720.webp 720w" sizes="(min-width: 520px) 520px, 100vw" alt="" width="540" height="430" fetchpriority="high" />
       </header>
 
-      <section class="gow-story" aria-labelledby="cerita-h">
-        <div class="gow-story__orn" aria-hidden="true">
-          <span></span>
-          <svg viewBox="0 0 48 24" width="48" height="24" fill="none" stroke="#C3A66B" stroke-width="1.2">
-            <path d="M4 12h12M32 12h12" />
-            <path d="M24 3c5 4 5 14 0 18-5-4-5-14 0-18z" />
-            <path d="M24 5v14" />
-          </svg>
-        </div>
-        <h2 id="cerita-h" class="gow-h2">The curtain stays closed until the Peramu arrives</h2>
-        <p class="gow-story__text">
-          Our booth is a bar behind a green curtain. On the bar lies the Buku Besar, the Great Book of Pegologi. It lists three potions, and it only reacts when someone is watching. Copi el Mejik, our Peramu, must prove all three before the Garden closes for another eleven years. So he needs you at the bar.
-        </p>
-      </section>
+      <main>
+        <section class="sec story" aria-labelledby="h-cerita">
+          <p class="kicker">Di booth</p>
+          <h2 id="h-cerita">Kamu ikut meracik minuman di booth ini</h2>
+          <p class="lead">Booth kami namanya The Garden of Wonder. Di sana ada Copi el Mejik, Peramu dari Negeri Pegology. Tiap hari dia meracik satu minuman.</p>
+          <p class="lead">Di bar, kamu ditemani kru kami, Kofo dan Pifi. Kamu ikut bantu meracik, lalu langkah terakhirnya kamu kerjakan sendiri.</p>
+        </section>
 
-      <section class="gow-ramuan" aria-labelledby="ramuan-h">
-        <h2 id="ramuan-h" class="gow-h2 gow-ramuan__title">One drink each day, Friday to Sunday</h2>
-        {
-          potions.map((p) => (
-            <article class={`gow-potion gow-potion--${p.id} gow-potion--${p.pos}`}>
-              <div class="gow-potion__media">
-                <Image
-                  src={p.img}
-                  alt={p.alt}
-                  format="webp"
-                  widths={widths}
-                  sizes={sizes}
-                  loading="lazy"
-                  class="gow-img"
-                />
+        <section class="sec" aria-labelledby="h-ramuan">
+          <p class="kicker">Minumannya</p>
+          <h2 id="h-ramuan">Satu hari, satu minuman</h2>
+          <div class="potions">
+            {potions.map((p) => (
+              <article class="potion">
+                <img src={`/jcw/lp/${p.img}-480.webp`} srcset={`/jcw/lp/${p.img}-480.webp 480w, /jcw/lp/${p.img}-800.webp 800w`} sizes="(min-width: 520px) 472px, calc(100vw - 48px)" alt={p.alt} width="480" height="270" loading="lazy" decoding="async" />
+                <div class="body">
+                  <span class="day">{p.hari}</span>
+                  <h3>{p.nama}</h3>
+                  <p class="tag" lang="en">{p.tagline}</p>
+                  <p class="isi">{p.isi}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="sec" aria-labelledby="h-peran" style="padding-top:8px">
+          <p class="kicker">Lima langkah</p>
+          <h2 id="h-peran">Begini urutannya di bar</h2>
+          <ol class="steps">
+            {peran.map(([n, t]) => <li><div><b>{n}</b><span>{t}</span></div></li>)}
+          </ol>
+        </section>
+
+        <section class="sec surat" id="surat" aria-labelledby="h-surat">
+          <p class="kicker">Daftar</p>
+          <h2 id="h-surat">Isi Surat Sayembara, gratis</h2>
+          <p class="lead" id="surat-intro">Surat Sayembara adalah form pendaftaran kami. Yang sudah daftar bisa masuk booth lebih dulu. Jadwal racikan Peramu kami kirim lewat WhatsApp sebelum acara.</p>
+
+          <div class="card">
+            <form id="gow-form" novalidate>
+              <div class="field">
+                <label for="f-nama">Nama kamu</label>
+                <input id="f-nama" name="nama" type="text" autocomplete="name" required maxlength="80" />
+                <p class="err" id="e-nama" hidden></p>
               </div>
-              <div class="gow-potion__text">
-                <p class="gow-potion__day">{p.hari}</p>
-                <h3 class="gow-potion__name">{p.nama}</h3>
-                <p class="gow-potion__tag">{p.tagline}</p>
-                <p class="gow-potion__body">{p.isi}</p>
+              <div class="field">
+                <label for="f-wa">Nomor WhatsApp</label>
+                <input id="f-wa" name="wa" type="tel" inputmode="numeric" autocomplete="tel" placeholder="081234567890" required aria-describedby="h-wa" />
+                <p class="help" id="h-wa">Nomor WhatsApp-mu cuma kami pakai buat kirim jadwal.</p>
+                <p class="err" id="e-wa" hidden></p>
               </div>
-            </article>
-          ))
-        }
-      </section>
-
-      <section class="gow-peran" aria-labelledby="peran-h">
-        <h2 id="peran-h" class="gow-h2">Your part at the bar, in five steps</h2>
-        <ol class="gow-peran__list">
-          {
-            peran.map(([nama, isi]) => (
-              <li>
-                <span class="gow-peran__body">
-                  <strong>{nama}</strong>
-                  <span>{isi}</span>
-                </span>
-              </li>
-            ))
-          }
-        </ol>
-      </section>
-
-      <section class="gow-surat" id="surat" aria-labelledby="surat-h">
-        <div class="gow-paper">
-          <svg class="gow-paper__seal" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
-            <circle cx="32" cy="32" r="28" fill="#0D4F33" />
-            <circle cx="32" cy="32" r="22" fill="none" stroke="#C3A66B" stroke-width="1.5" />
-            <path d="M32 16c8 6 8 26 0 32-8-6-8-26 0-32z" fill="none" stroke="#C3A66B" stroke-width="1.5" />
-            <path d="M32 18v28" stroke="#C3A66B" stroke-width="1.5" />
-          </svg>
-          <h2 id="surat-h" class="gow-paper__title">Get your Surat Sayembara, free</h2>
-          <p class="gow-paper__intro">
-            The Surat Sayembara is your letter of invitation. Leave your name and WhatsApp number. You get priority entry when the curtain opens, and we send you the Peramu’s arrival schedule on WhatsApp before the event.
-          </p>
-
-          <form id="gow-form" novalidate>
-            <div class="gow-field">
-              <label for="f-nama">Name</label>
-              <input id="f-nama" name="nama" type="text" autocomplete="name" required />
-              <p class="gow-err" id="e-nama" hidden></p>
-            </div>
-
-            <div class="gow-field">
-              <label for="f-wa">WhatsApp number</label>
-              <input
-                id="f-wa"
-                name="wa"
-                type="tel"
-                inputmode="numeric"
-                autocomplete="tel"
-                required
-                aria-describedby="h-wa"
-              />
-              <p class="gow-help" id="h-wa">Used only to send you the Peramu’s arrival schedule.</p>
-              <p class="gow-err" id="e-wa" hidden></p>
-            </div>
-
-            <div class="gow-field">
-              <label for="f-kota">City</label>
-              <select id="f-kota" name="kota" required>
-                <option value="" selected>Pick your city</option>
-                {kota.map((k) => <option value={k}>{k}</option>)}
-              </select>
-              <p class="gow-err" id="e-kota" hidden></p>
-            </div>
-
-            <fieldset class="gow-field gow-days" id="f-hari">
-              <legend>Which day are you coming?</legend>
-              <div class="gow-chips">
-                {
-                  hari.map((h) => (
-                    <label class="gow-chip">
-                      <input type="radio" name="hari" value={h} />
-                      <span>{h}</span>
-                    </label>
-                  ))
-                }
+              <div class="field">
+                <label for="f-kota">Kamu tinggal di kota mana?</label>
+                <select id="f-kota" name="kota" required>
+                  <option value="" selected>Pilih kota</option>
+                  {kota.map((k) => <option value={k}>{k}</option>)}
+                </select>
+                <p class="err" id="e-kota" hidden></p>
               </div>
-              <p class="gow-err" id="e-hari" hidden></p>
-            </fieldset>
+              <fieldset class="field" id="f-hari">
+                <legend>Mau datang hari apa?</legend>
+                <div class="chips">
+                  {hari.map(([v, l]) => <label class="chip"><input type="radio" name="hari" value={v} /><span>{l}</span></label>)}
+                </div>
+                <p class="err" id="e-hari" hidden></p>
+              </fieldset>
+              <p class="err" id="e-form" role="alert" hidden>Suratmu belum terkirim. Coba kirim sekali lagi.</p>
+              <button type="submit" class="btn">Kirim Surat</button>
+            </form>
 
-            <p class="gow-err" id="e-form" role="alert" hidden>Your letter was not sent. Please try again.</p>
-            <button type="submit" class="gow-btn gow-btn--form">Send my letter</button>
-          </form>
-
-          <div id="gow-sealed-wrap" aria-live="polite">
-            <div id="gow-sealed" class="gow-sealed" tabindex="-1" hidden>
-              <h3 class="gow-sealed__title">Your letter is sealed</h3>
-              <p class="gow-sealed__code" id="s-kode"></p>
-              <p class="gow-sealed__text">
-                Send this code to our WhatsApp to receive your invitation and a calendar link. Show the code to Pifi at the booth.
-              </p>
-              <a class="gow-btn" id="s-wa" href="https://wa.me/6281222809995" target="_blank" rel="noopener">Send on WhatsApp</a>
-              <p class="gow-sealed__meta"><span id="s-nama"></span> · <span id="s-hari"></span></p>
+            <div id="gow-sealed" class="sealed" tabindex="-1" aria-live="polite" hidden>
+              <h3>Suratmu sudah masuk</h3>
+              <p class="code" id="s-kode"></p>
+              <p>Sekarang kirim kode suratmu ke WhatsApp kami. Nanti kami kirim undangan dan link kalendernya. Waktu kamu datang ke booth, tunjukkan kodenya ke Pifi.</p>
+              <a class="btn btn-gold" id="s-wa" href="https://wa.me/6281222809995" target="_blank" rel="noopener" data-wa>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.7 1.2 1.6 2 1.1 1 2 1.3 2.3 1.4.3.1.5.1.6-.1l.8-1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.6-.1 1.2z"/></svg>
+                Kirim Kode ke WhatsApp
+              </a>
+              <p class="meta"><span id="s-nama"></span> · <span id="s-hari"></span></p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="gow-info" aria-labelledby="info-h">
-        <h2 id="info-h" class="gow-h2">Find us at ICE BSD</h2>
-        <dl class="gow-info__list">
-          <div><dt>Date</dt><dd>4–6 December 2026</dd></div>
-          <div><dt>Hours</dt><dd>10.00–22.00 WIB</dd></div>
-          <div><dt>Venue</dt><dd>ICE BSD</dd></div>
-          <div><dt>Booth</dt><dd>The Garden of Wonder, C94-95</dd></div>
-        </dl>
-        <figure class="gow-quote">
-          <blockquote>
-            <p>Look for the closed green curtain at Booth C94-95.</p>
-          </blockquote>
-        </figure>
-      </section>
-    </main>
+        <section class="sec" aria-labelledby="h-lokasi">
+          <p class="kicker">Lokasi</p>
+          <h2 id="h-lokasi">Booth C94-95, ICE BSD City</h2>
+          <dl class="info">
+            <div><dt>Tanggal</dt><dd>4–6 Desember 2026</dd></div>
+            <div><dt>Jam</dt><dd>10.00–22.00 WIB</dd></div>
+            <div><dt>Tempat</dt><dd>ICE BSD City</dd></div>
+            <div><dt>Booth</dt><dd>C94-95</dd></div>
+          </dl>
+          <figure class="loc">
+            <img src="/jcw/inv/ice-bsd.webp" alt="Gedung ICE BSD City" width="829" height="603" loading="lazy" decoding="async" />
+          </figure>
+          <div class="ctas">
+            <a class="btn btn-line" href={maps} target="_blank" rel="noopener">Buka Google Maps</a>
+          </div>
+        </section>
+      </main>
 
-    <footer class="gow-foot">
-      <p>150 Coffee × Jakarta Coffee Week 2026 · <a href="/">150coffeegarden.com</a></p>
-    </footer>
+      <footer class="foot">
+        <img src="/jcw/lp/panorama.webp" alt="" width="960" height="376" loading="lazy" decoding="async" />
+        <p>150 Coffee Garden · Jakarta Coffee Week 2026</p>
+      </footer>
+    </div>
+
+    <div class="sticky" id="sticky" aria-hidden="true"><a class="btn" href="#surat" tabindex="-1" data-cta="sticky">Isi Surat Sayembara</a></div>
 
     <script>
+      import { initPixel } from '../scripts/pixel';
+      initPixel('ViewContent', 6000);
+
       const KEY = 'gow-surat';
-      const form = document.getElementById('gow-form') as HTMLFormElement | null;
-      const sealed = document.getElementById('gow-sealed') as HTMLElement | null;
-      const intro = document.querySelector('.gow-paper__intro') as HTMLElement | null;
-
       const WA = '6281222809995';
-      const waUrl = (d: { nama: string; hari: string; kode: string }) =>
+      const HARI_ID: Record<string, string> = { 'Fri, 4 Dec': 'Jumat, 4 Desember', 'Sat, 5 Dec': 'Sabtu, 5 Desember', 'Sun, 6 Dec': 'Minggu, 6 Desember' };
+      const $ = (id: string) => document.getElementById(id) as HTMLElement;
+      const form = $('gow-form') as HTMLFormElement;
+      const sealed = $('gow-sealed');
+      type Surat = { nama: string; hari: string; kode: string };
+      const hariId = (h: string) => HARI_ID[h] || h;
+      const waUrl = (d: Surat) =>
         `https://wa.me/${WA}?text=` +
-        encodeURIComponent(
-          `Hi 150 Coffee, this is ${d.nama}. My Surat Sayembara code is ${d.kode}. I'm coming on ${d.hari}.`
-        );
+        encodeURIComponent(`Halo 150 Coffee, aku ${d.nama}. Kode Surat Sayembara-ku ${d.kode}, rencananya aku datang ${hariId(d.hari)}. Minta undangan dan link kalendernya, ya.`);
 
-      function showSealed(data: { nama: string; hari: string; kode: string }, focus: boolean) {
-        if (!form || !sealed) return;
-        (document.getElementById('s-wa') as HTMLAnchorElement).href = waUrl(data);
-        (document.getElementById('s-kode') as HTMLElement).textContent = data.kode;
-        (document.getElementById('s-nama') as HTMLElement).textContent = data.nama;
-        (document.getElementById('s-hari') as HTMLElement).textContent = data.hari;
+      function showSealed(d: Surat, focus: boolean) {
+        ($('s-wa') as HTMLAnchorElement).href = waUrl(d);
+        $('s-kode').textContent = d.kode;
+        $('s-nama').textContent = d.nama;
+        $('s-hari').textContent = hariId(d.hari);
         form.hidden = true;
-        if (intro) intro.hidden = true;
+        $('surat-intro').hidden = true;
         sealed.hidden = false;
         if (focus) sealed.focus();
       }
 
       try {
-        const raw = localStorage.getItem(KEY);
-        if (raw) {
-          const d = JSON.parse(raw);
-          if (d && d.nama && d.hari && d.kode) showSealed(d, false);
-        }
+        const d = JSON.parse(localStorage.getItem(KEY) || 'null');
+        if (d && d.nama && d.hari && d.kode) showSealed(d, false);
       } catch (_) {}
+
+      // Sticky CTA: muncul setelah hero lewat, hilang saat bagian surat terlihat.
+      const sticky = $('sticky');
+      let pastHero = false, atForm = false;
+      const upd = () => sticky.classList.toggle('on', pastHero && !atForm);
+      new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting; upd(); }).observe(document.querySelector('.hero')!);
+      new IntersectionObserver(([e]) => { atForm = e.isIntersecting; upd(); }).observe($('surat'));
 
       function source() {
         const q = new URLSearchParams(location.search);
         const utm = ['utm_source', 'utm_medium', 'utm_campaign'].map((k) => q.get(k) || '').join('/');
         if (utm !== '//') return utm;
+        if (q.get('fbclid')) return 'meta/fbclid';
         try {
           return document.referrer ? new URL(document.referrer).host : 'direct';
         } catch (_) {
@@ -319,48 +348,40 @@ const hari = ['Fri, 4 Dec', 'Sat, 5 Dec', 'Sun, 6 Dec'];
         }
       }
 
-      function setError(fieldId: string, errId: string, msg: string | null, extraDesc = '') {
-        const field = document.getElementById(fieldId) as HTMLElement;
-        const err = document.getElementById(errId) as HTMLElement;
+      function setError(fieldId: string, errId: string, msg: string | null, extra = '') {
+        const field = $(fieldId);
+        const err = $(errId);
+        err.textContent = msg || '';
+        err.hidden = !msg;
         if (msg) {
-          err.textContent = msg;
-          err.hidden = false;
           field.setAttribute('aria-invalid', 'true');
-          field.setAttribute('aria-describedby', (extraDesc + ' ' + errId).trim());
+          field.setAttribute('aria-describedby', (extra + ' ' + errId).trim());
         } else {
-          err.textContent = '';
-          err.hidden = true;
           field.removeAttribute('aria-invalid');
-          if (extraDesc) field.setAttribute('aria-describedby', extraDesc);
-          else field.removeAttribute('aria-describedby');
+          extra ? field.setAttribute('aria-describedby', extra) : field.removeAttribute('aria-describedby');
         }
       }
 
-      form?.addEventListener('submit', async (ev) => {
+      form.addEventListener('submit', async (ev) => {
         ev.preventDefault();
-        const nama = (document.getElementById('f-nama') as HTMLInputElement).value.trim();
-        const wa = (document.getElementById('f-wa') as HTMLInputElement).value.replace(/[\s-]/g, '');
-        const kota = (document.getElementById('f-kota') as HTMLSelectElement).value;
-        const picked = form.querySelector('input[name="hari"]:checked') as HTMLInputElement | null;
-
-        const okNama = (nama.match(/\p{L}/gu) || []).length >= 2;
+        const fd = new FormData(form);
+        const nama = String(fd.get('nama') || '').trim();
+        const wa = String(fd.get('wa') || '').replace(/[\s-]/g, '');
+        const kota = String(fd.get('kota') || '');
+        const hari = String(fd.get('hari') || '');
+        const okNama = nama.length >= 2;
         const okWa = /^(\+62|62|0)8\d{7,12}$/.test(wa);
-        const okKota = kota !== '';
-        const okHari = !!picked;
+        setError('f-nama', 'e-nama', okNama ? null : 'Namamu belum diisi.');
+        setError('f-wa', 'e-wa', okWa ? null : 'Nomor WhatsApp-nya belum benar. Tulis seperti contoh ini: 081234567890.', 'h-wa');
+        setError('f-kota', 'e-kota', kota ? null : 'Kotamu belum diisi.');
+        setError('f-hari', 'e-hari', hari ? null : 'Pilih dulu kamu mau datang hari apa.');
+        if (!okNama) return $('f-nama').focus();
+        if (!okWa) return $('f-wa').focus();
+        if (!kota) return $('f-kota').focus();
+        if (!hari) return (form.querySelector('input[name="hari"]') as HTMLElement).focus();
 
-        setError('f-nama', 'e-nama', okNama ? null : 'Please type your name.');
-        setError('f-wa', 'e-wa', okWa ? null : 'Type a WhatsApp number, like 081234567890.', 'h-wa');
-        setError('f-kota', 'e-kota', okKota ? null : 'Pick your city.');
-        setError('f-hari', 'e-hari', okHari ? null : 'Pick one day.');
-
-        if (!okNama) return (document.getElementById('f-nama') as HTMLElement).focus();
-        if (!okWa) return (document.getElementById('f-wa') as HTMLElement).focus();
-        if (!okKota) return (document.getElementById('f-kota') as HTMLElement).focus();
-        if (!okHari) return (form.querySelector('input[name="hari"]') as HTMLElement).focus();
-
-        const hari = (picked as HTMLInputElement).value;
         const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-        const fail = document.getElementById('e-form') as HTMLElement;
+        const fail = $('e-form');
         fail.hidden = true;
         btn.disabled = true;
         try {
@@ -371,15 +392,10 @@ const hari = ['Fri, 4 Dec', 'Sat, 5 Dec', 'Sun, 6 Dec'];
           });
           const out = await res.json();
           if (!res.ok || !out.ok || !out.code) throw new Error('rejected');
-          const data = { nama, hari, kode: out.code as string };
-          try {
-            localStorage.setItem(KEY, JSON.stringify(data));
-          } catch (_) {}
-          showSealed(data, true);
-          // In-app browsers often block this jump; the button in the sealed panel is the fallback.
-          setTimeout(() => {
-            location.href = waUrl(data);
-          }, 1500);
+          const d: Surat = { nama, hari, kode: out.code };
+          try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (_) {}
+          window.fbq?.('track', 'Lead', { content_name: 'Surat Sayembara JCW', content_category: hari });
+          showSealed(d, true);
         } catch (_) {
           fail.hidden = false;
           btn.disabled = false;
