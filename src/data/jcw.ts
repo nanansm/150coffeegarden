@@ -14,7 +14,7 @@ export const jcwEvent = {
   startDate: '2026-12-04',
   endDate: '2026-12-06',
   doorsOpen: '10:00',
-  doorsClose: '22:00',
+  doorsClose: '20:30',
   timezone: 'Asia/Jakarta',
   uid: 'jcw-2026@150coffeegarden.com',
 } as const;
@@ -95,7 +95,7 @@ function icsLocation(): string {
 /** Builds the full VCALENDAR document for the JCW appearance. */
 export function toIcs(): string {
   // Deliberately an all-day event, not a timed one. A single VEVENT running
-  // 4 Dec 10:00 to 6 Dec 22:00 renders as one unbroken 60-hour busy block —
+  // 4 Dec 10:00 to 6 Dec 20:30 renders as one unbroken 60-hour busy block —
   // it swallows two nights of the guest's calendar and invites deletion.
   // All-day shows as a quiet three-day banner and marks nobody busy; the
   // opening hours live in the description instead.
