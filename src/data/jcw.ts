@@ -144,3 +144,41 @@ export function googleCalendarUrl(): string {
 
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
+
+/**
+ * Jadwal booth untuk pengunjung (sumber: sheet "schedule" tim 150, 26 Nov 2026).
+ * Hanya acara publik; jadwal kru tidak ditampilkan. Jam di luar slot = booth buka reguler.
+ */
+export type JcwSlot = { mulai: string; selesai: string; jenis: 'tob' | 'show'; judul: string };
+export const jcwJadwal: { date: string; day: string; tgl: string; en: string; slot: JcwSlot[] }[] = [
+  {
+    date: '2026-12-04', day: 'DAY 1', tgl: 'Jumat, 4 Des 2026', en: 'A Holiday in a Chalice',
+    slot: [
+      { mulai: '13.00', selesai: '14.00', jenis: 'tob', judul: 'Widha & Suzy' },
+      { mulai: '14.00', selesai: '15.00', jenis: 'show', judul: 'Sesi 1' },
+      { mulai: '16.00', selesai: '17.00', jenis: 'tob', judul: 'Dill Tea' },
+      { mulai: '17.00', selesai: '18.00', jenis: 'show', judul: 'Sesi 2' },
+    ],
+  },
+  {
+    date: '2026-12-05', day: 'DAY 2', tgl: 'Sabtu, 5 Des 2026', en: 'Burning Memories',
+    slot: [
+      { mulai: '13.00', selesai: '14.00', jenis: 'show', judul: 'Sesi 1' },
+      { mulai: '14.00', selesai: '15.00', jenis: 'tob', judul: 'Lies Mulla' },
+      { mulai: '16.00', selesai: '17.00', jenis: 'show', judul: 'Sesi 2' },
+    ],
+  },
+  {
+    date: '2026-12-06', day: 'DAY 3', tgl: 'Minggu, 6 Des 2026', en: 'The Last Chalice',
+    slot: [
+      { mulai: '13.00', selesai: '14.00', jenis: 'tob', judul: 'Oky Riskiyah' },
+      { mulai: '14.00', selesai: '15.00', jenis: 'show', judul: 'Sesi 1' },
+      { mulai: '16.00', selesai: '17.00', jenis: 'tob', judul: 'Dilco' },
+      { mulai: '17.00', selesai: '18.00', jenis: 'show', judul: 'Sesi 2' },
+    ],
+  },
+];
+
+/** "Sesi 1 14.00 WIB · Sesi 2 17.00 WIB" untuk satu hari. */
+export const jcwSesi = (d: (typeof jcwJadwal)[number]) =>
+  d.slot.filter((s) => s.jenis === 'show').map((s) => `${s.judul} ${s.mulai} WIB`).join(' · ');

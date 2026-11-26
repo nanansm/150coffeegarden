@@ -2,10 +2,11 @@
 /**
  * /jcw — landing The Garden of Wonder (biolink IG + traffic Meta Ads).
  * Gaya sama dengan undangan /invitationjcw (krem, hijau, emas, Noto Serif Display),
- * tapi satu halaman scroll supaya form langsung terjangkau. Teks: ~/jcw-review/jcwpage/copy-final.md.
+ * tapi satu halaman scroll supaya form langsung terjangkau.
  * Gambar sudah dikecilkan statis di /public/jcw/lp (tanpa pipeline astro:assets).
  */
 import '../styles/fonts.css';
+import { jcwJadwal } from '../data/jcw';
 
 const potions = [
   {
@@ -127,6 +128,18 @@ const desc =
 
       .steps { list-style: none; padding: 0; margin: 28px 0 0; text-align: left; counter-reset: s; display: grid; gap: 12px; }
       .steps li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start; padding: 14px 16px; border-radius: 14px; background: #f7f1e1; }
+      .days { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 24px; }
+      .day-tab { font: 600 .95rem/1.2 inherit; font-family: inherit; color: var(--green); background: #f7f1e1; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 4px; cursor: pointer; }
+      .day-tab small { display: block; font-weight: 400; font-size: .8rem; opacity: .75; margin-top: 2px; }
+      .day-tab[aria-selected='true'] { background: var(--green); border-color: var(--green); color: #fff; }
+      .day-tab:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+      .day-show { margin-top: 20px; font: 500 1.2rem/1.3 'Noto Serif Display', Georgia, serif; color: var(--green); text-align: left; }
+      .tl { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 16px; text-align: left; }
+      .tl li { position: relative; display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 14px; background: #f7f1e1; border: 1.5px solid transparent; }
+      .tl time { font: 500 1rem/1 'Noto Serif Display', Georgia, serif; color: var(--green); font-variant-numeric: lining-nums tabular-nums; }
+      .tl .tag { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-ink); font-weight: 600; }
+      .tl b { display: block; color: var(--ink); font-weight: 600; margin-top: 2px; }
+      .tl-show { background: #eef1e8 !important; }
       .steps li::before { content: counter(s); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--gold-ink); color: var(--green); font: 500 1.15rem/1 'Noto Serif Display', Georgia, serif; font-variant-numeric: lining-nums; margin-top: 2px; }
       .steps b { display: block; color: var(--green); font: 500 1.1rem 'Noto Serif Display', Georgia, serif; }
       .steps span { font-size: .95rem; line-height: 1.45; display: block; margin-top: 2px; text-wrap: pretty; }
@@ -221,6 +234,35 @@ const desc =
           </ol>
         </section>
 
+        <section class="sec" id="jadwal" aria-labelledby="h-jadwal">
+          <p class="kicker">Jadwal booth</p>
+          <h2 id="h-jadwal">Kapan Take Over Bar dan pertunjukan</h2>
+          <p class="lead">Booth buka 10.00–20.30 WIB. Di luar jam di bawah, booth buka seperti biasa.</p>
+          <div class="days" role="tablist" aria-label="Pilih hari">
+            {jcwJadwal.map((d, i) => (
+              <button type="button" role="tab" class="day-tab" id={`t-${d.date}`} aria-controls={`p-${d.date}`} aria-selected={i === 0 ? 'true' : 'false'} data-date={d.date}>
+                {d.tgl.split(',')[0]}<small>{d.tgl.split(', ')[1].replace(' 2026', '')}</small>
+              </button>
+            ))}
+          </div>
+          {jcwJadwal.map((d, i) => (
+            <div class="day-panel" role="tabpanel" id={`p-${d.date}`} aria-labelledby={`t-${d.date}`} data-date={d.date} hidden={i !== 0}>
+              <p class="day-show">{d.en}</p>
+              <ol class="tl">
+                {d.slot.map((s) => (
+                  <li class={`tl-${s.jenis}`}>
+                    <time>{s.mulai}–{s.selesai}</time>
+                    <div>
+                      <span class="tag">{s.jenis === 'tob' ? 'Take Over Bar' : `Pertunjukan · ${s.judul}`}</span>
+                      <b>{s.jenis === 'tob' ? s.judul : d.en}</b>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </section>
+
         <section class="sec surat" id="surat" aria-labelledby="h-surat">
           <p class="kicker">Daftar</p>
           <h2 id="h-surat">Isi Surat Sayembara, gratis</h2>
@@ -300,6 +342,16 @@ const desc =
     <script>
       import { initPixel } from '../scripts/pixel';
       initPixel('ViewContent', 6000);
+
+      // Jadwal: tab hari; saat acara, hari ini terbuka otomatis (WIB).
+      const tabs = [...document.querySelectorAll<HTMLButtonElement>('.day-tab')];
+      const pick = (date: string) => {
+        tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.date === date)));
+        document.querySelectorAll<HTMLElement>('.day-panel').forEach((p) => (p.hidden = p.dataset.date !== date));
+      };
+      tabs.forEach((t) => t.addEventListener('click', () => pick(t.dataset.date!)));
+      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
+      if (tabs.some((t) => t.dataset.date === today)) pick(today);
 
       const KEY = 'gow-surat';
       const WA = '6281222809995';

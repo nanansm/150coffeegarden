@@ -11,6 +11,7 @@
  * RSVP) -> RSVP masuk Google Sheet lewat /api/jcw-rsvp -> redirect WA admin.
  */
 import '../../styles/fonts.css';
+import { jcwJadwal, jcwSesi } from '../../data/jcw';
 
 interface Props {
   guest?: { slug: string; nama: string; panggilan: string; grup: string } | null;
@@ -135,7 +136,7 @@ const maps = 'https://www.google.com/maps/search/?api=1&query=ICE+BSD+City+Hall+
                   <p class="r-day">{h.day} · {h.tgl}</p>
                   <p class="r-show">{h.show ? h.show : 'Pertunjukan'}</p>
                   {h.en && <p class="r-en">{h.en}</p>}
-                  <p class="r-time">Sesi 1 14.00 WIB · Sesi 2 16.00 WIB</p>
+                  <p class="r-time">{jcwSesi(jcwJadwal[i])}</p>
                 </div>
               </li>
             ))}
